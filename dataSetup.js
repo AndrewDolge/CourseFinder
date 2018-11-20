@@ -1,10 +1,11 @@
 
 //Currently node js file is looping through each department and grabbing necessary information. Still need to place data in database. 
 
-var fs = require('fs');
-var path = require('path');
-var https = require('https');
-var url = require('url'); 
+var fs     = require('fs');
+var path   = require('path');
+var https  = require('https');
+var url    = require('url'); 
+var sqlite = require('sqlite3').verbose();
 
 
 //list of all departments to loop through for data
@@ -13,7 +14,7 @@ var depart = ["ACCT","ACSC","ACST","AERO","AMBA","ARAB","ARHS","ARTH","BCHM","BC
 var i;
 
 //for loop to go through each department 
-for(i= 0; i < depart.length; i++){
+for(i= 1; i < 2; i++){
 
 	var year = 2019;
 	var term = 20;
@@ -41,6 +42,7 @@ for(i= 0; i < depart.length; i++){
 		var crnArr = [];
 		var creditArr = [];
 		var courseDescrip = [];
+		var timeArr = [];
 		var subject = "";
 	
 		res.on("data", (chunk) =>{
@@ -59,6 +61,7 @@ for(i= 0; i < depart.length; i++){
 				creditArr = getCredits(body);
 				courseDescrip = getDescrip(body);
 				subject = getSubject(body);
+				timeArr = getTime(body);
 		
 			
 			
@@ -75,6 +78,7 @@ for(i= 0; i < depart.length; i++){
 				console.log(crnArr.length);
 				console.log(creditArr.length);
 				console.log(courseDescrip.length);
+				console.log(timeArr);
 			
 				/*for(j=0; j < courseNumArr.length ; j++){
 					console.log(courseNumArr[j]);
@@ -103,6 +107,34 @@ for(i= 0; i < depart.length; i++){
 	}); //https.get
 
 } //end of for loop
+
+
+function setUpTables(){
+
+
+	//open database connection
+	let db = new sqlite.Database('.' + path.sep + 'db' + path.sep + 'course_data.db', sqlite3.OPEN_READWRITE, (err) => {
+		if (err) {
+		  console.error(err.message);
+		}
+		console.log('Connected to the course_data database.');
+	  });
+
+
+
+
+	  //close the database connection
+	  db.close((err) => {
+		if (err) {
+		  console.error(err.message);
+		}
+		console.log('Close the database connection.');
+	  });
+
+
+
+}
+
 
 //returns array of professors 
 function getProf(str){
@@ -298,7 +330,6 @@ function getCRN(str){
 	
 }
 
-
 //returns credits of each course 
 function getCredits(str){
 	
@@ -395,4 +426,76 @@ function getSubject(str){
 	
 	return subjectString;	
 	
+}
+
+
+/**
+ * parses the given str for the times of the given class.
+ * 
+ * @param {string} str 
+ * @returns {Array} an array of strings that contain the class times for each class, or an empty string if no matches were found.
+ */
+function getTime(str){
+	//parse the string with regex
+	var pattern = /(<td class="time">[0-9]+:[0-9]+ (am|pm)<br>[0-9]+:[0-9]+ (am|pm))|(<td class="noTime">(&nbsp))/g;
+	var result = str.match(pattern);
+	time = []
+
+	// if there were matches
+	if(Array.isArray(result)){
+		var timePattern = /[0-9]+:[0-9]+ (am|pm)/g;
+
+		//for every class (i = starting index of each new course)
+		for(let i = 0; i < result.length; i= i + 7){
+			var timestr = "";
+			//for every day of the week in the course
+			for(let j = i; j < i+7; j++){
+
+				//if there is a time pattern
+				if(timePattern.test(result[j])){
+					//append the string
+					timestr =timestr.concat( getDayNumber(j) + " " +  result[j].match(timePattern)[0] + "-"+result[j].match(timePattern)[1] + ",");	
+				}
+
+			}
+			//delete the last comma, and add it to the array.
+			timestr = timestr.substr(0,timestr.length -1);
+			time.push(timestr);	
+		}
+
+		return time;
+	//if no matches return an empty array.
+	}else{
+		return [];
+	}
+
+}
+
+/**
+ * returns the letter code of the day of the week based on the given number.
+ * @param {number} i the number of the array 
+ * @returns {string} the letter code of the day of the week.
+ */
+function getDayNumber(i){
+	result = "";
+
+	if(i % 7 == 0){
+		result = "M";
+	}else if(i % 7 == 1){
+		result = "T";
+	}else if(i % 7 == 2){
+		result = "W";
+	}else if(i % 7 == 3){
+		result = "R";
+	}else if(i % 7 == 4){
+		result = "F";
+	}else if(i % 7 == 5){
+		result = "SA";
+	}else if(i % 7 == 6){
+		result = "SU";
+	}
+
+
+	return result;
+
 }
