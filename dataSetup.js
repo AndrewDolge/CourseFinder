@@ -1,4 +1,3 @@
-
 //Currently node js file is looping through each department and grabbing necessary information. Still need to place data in database. 
 
 var fs = require('fs');
@@ -6,9 +5,9 @@ var path = require('path');
 var https = require('https');
 var url = require('url'); 
 
-
 //list of all departments to loop through for data
 var depart = ["ACCT","ACSC","ACST","AERO","AMBA","ARAB","ARHS","ARTH","BCHM","BCOM","BETH","BIOL","BLAW","BUSN","CATH","CHDC","CHEM","CHIN","CIED","CISC","CJUS","CLAS","COAC","COJO","COMM","CPSY","CSIS","CSMA","CTED","DRSW","DSCI","DVDM","DVDT","DVHS","DVLS","DVMT","DVPH","DVPM","DVPT","DVSP","DVSS","DVST","ECMP","ECON","EDCE","EDLD","EDUA","EDUC","EGED","ENGL","ENGR","ENTR","ENVR","ESCI","ETLS","EXSC","FAST","FILM","FINC","FREN","GBEC","GENG","GEOG","GEOL","GERM","GIFT","GMUS","GRED","GREK","GRPE","GRSW","GSPA","HIST","HLTH","HONR","HRDO","IBUS","IDSC","IDSW","IDTH","INAC","INCH","INEC","INEG","INFC","INFR","INGR","INHR","INID","INIM","INJP","INLW","INMC","INMG","INMK","INOP","INPS","INRS","INSP","INST","INTR","IRGA","ITAL","JAPN","JOUR","JPST","LATN","LAWS","LEAD","LGST","LHDT","MATH","MBAC","MBEC","MBEN","MBEX","MBFC","MBFR","MBFS","MBGC","MBGM","MBHC","MBHR","MBIF","MBIM","MBIS","MBLW","MBMG","MBMK","MBNP","MBOP","MBQM","MBSK","MBSP","MBST","MBUN","MBVE","MFGS","MGMP","MGMT","MKTG","MMUS","MSQS","MSRA","MUSC","MUSN","MUSP","MUSR","MUSW","NSCI","ODOC","OPMT","PHED","PHIL","PHYS","PLLD","POLS","PSYC","PUBH","QMCS","READ","REAL","RECE","REDP","RUSS","SABC","SABD","SACS","SAED","SAIM","SAIN","SALS","SAMB","SASE","SASW","SEAM","SEIS","SMEE","SOCI","SOWK","SPAN","SPED","SPGT","SPUG","STAT","STEM","TEGR","THEO","THTR","WMST"];
+
 
 var i;
 
@@ -41,7 +40,8 @@ for(i= 0; i < depart.length; i++){
 		var crnArr = [];
 		var creditArr = [];
 		var courseDescrip = [];
-		var subject = "";
+		var subjectCode = "";
+		var fullSubjectName = "";
 	
 		res.on("data", (chunk) =>{
 			body += chunk.toString();
@@ -58,15 +58,19 @@ for(i= 0; i < depart.length; i++){
 				crnArr = getCRN(body);
 				creditArr = getCredits(body);
 				courseDescrip = getDescrip(body);
-				subject = getSubject(body);
+				//subject = getSubject(body);
+				subjectCode = getSubject(body);
+				fullSubjectName = getSubjectName(body);
+				
+					console.log(subjectCode + ": " + fullSubjectName);
+				
 		
-			
-			
 				//testing print statements, can remove later 
 				var j;
-				console.log("-----------");
+				//console.log("-----------");
 			
-				console.log(subject);
+				/*console.log(subjectCode);
+				console.log(fullSubjectName);
 				console.log(profArr.length);
 				console.log(courseNumArr.length);
 				console.log(buildArr.length);
@@ -74,7 +78,7 @@ for(i= 0; i < depart.length; i++){
 				console.log(courseNameArr.length);
 				console.log(crnArr.length);
 				console.log(creditArr.length);
-				console.log(courseDescrip.length);
+				console.log(courseDescrip.length);*/
 			
 				/*for(j=0; j < courseNumArr.length ; j++){
 					console.log(courseNumArr[j]);
@@ -97,7 +101,8 @@ for(i= 0; i < depart.length; i++){
 				for(j=0; j < creditArr.length ; j++){
 					console.log(creditArr[j]);
 				};*/
-			
+				//console.log(subjectCode);
+				//console.log(res.req.path);
 		}); //res.on end
 
 	}); //https.get
@@ -130,6 +135,8 @@ function getProf(str){
 	return profArray;
 	
 }
+
+
 
 //returns array of course and section numbers 
 function getCourseNum(str){
@@ -372,27 +379,43 @@ function getDescrip(str){
 //returns the four letter subject code of the current page being parsed 
 function getSubject(str){
 	var subjectString = "";
-	
+	var pattern = /(<h3 style="margin-top:1.5rem">).+<\/h3>/g;
+	var match = str.match(pattern);
+	if(match != null){
+		var fullSubject = match[0];
 		var i;
-		for (i= 0; i < str.length ; i++){
-			if(str[i] === 's' && str[i+1] === 'e' && str[i+2] === 'l' && str[i+3] === 'e' && str[i+4] === 'c' && str[i+5] === 't' && str[i+6] === 'e' && str[i+7] === 'd' && str[i+8] === 'S' && str[i+9] === 'u' && str[i+10]== 'b' && str[i+16]== '='){
-				var pos = 17; 
-				var testString = '';
-				while(str[i+pos] !== '"'){
-					if(str[i+pos] !== '\t' && str[i+pos]!== '\n'){
-						testString += str[i+pos];
-						
-					}
-					pos++;					
-				}
-				testString = testString.trim();
+		var flag = true;
+		for(i=0; i<fullSubject.length;i++){
+			//console.log(fullSubject[i]);
+			if(fullSubject[i] == '>' && flag==true){
+				subjectString = fullSubject.substring((i+1),(i+5));
+				flag=false;
+			}
 			
-				subjectString = testString; 
-				
-				
-			}		
-		};
-	
-	return subjectString;	
-	
+		}
+	}
+	return subjectString;
+}
+function getSubjectName(str){
+	var pattern = /(<h3 style="margin-top:1.5rem">).+<\/h3>/g;
+	var match = str.match(pattern);
+	//console.log(match);
+	if(match != null){
+		var fullSubject = match[0];
+		var subjectName = "";
+		var i;
+		for(i=0; i<fullSubject.length;i++){
+			//console.log(fullSubject[i]);
+			if(fullSubject[i-15] == ':'){
+				var j = i;
+				while(fullSubject[j]!='<'){
+					subjectName += fullSubject[j];
+					j++;
+				}
+				break;
+			}
+		}
+		//console.log(subjectCode);
+	}
+	return subjectName;
 }
