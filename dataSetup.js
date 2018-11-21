@@ -16,7 +16,7 @@ if (fs.existsSync(db_path)){
 	fs.unlinkSync(db_path);
 }	
 // create and open database connection
-let db = new sqlite.Database(db_path), (err) => {
+let db = new sqlite.Database(db_path, (err) => {
 	if (err) {
 	  console.error(err.message);
 	}
@@ -95,8 +95,8 @@ for(i= 0; i < depart.length; i++){
 				subjectCode = getSubject(body);
 				fullSubjectName = getSubjectName(body);
 				
-					console.log(subjectCode + ": " + fullSubjectName);
-					console.log(timeArr);
+					//console.log(subjectCode + ": " + fullSubjectName);
+					//console.log(timeArr);*/
 				
 		
 		
@@ -111,7 +111,7 @@ for(i= 0; i < depart.length; i++){
 				
 				//testing print statements, can remove later 
 				var j;
-				console.log("-----------");
+				/*console.log("-----------");
 			
 				console.log(subjectCode);
 				console.log(fullSubjectName);
@@ -125,7 +125,7 @@ for(i= 0; i < depart.length; i++){
 				console.log(courseDescrip.length);
 				console.log(sectionNumArr.length);
 				console.log(onlyCourseNumArr.length);
-				console.log(timeArr.length);
+				console.log(timeArr.length);*/
 			
 				/*for(j=0; j < courseNumArr.length ; j++){
 					console.log(courseNumArr[j]);
