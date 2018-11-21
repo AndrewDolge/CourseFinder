@@ -26,12 +26,19 @@ let db = new sqlite.Database( 'ust_courses.sqlite3', (err) => {
 		//GetData();
 	}
   });
+	
+db.close((err) => {
+  if (err) {
+    return console.error(err.message);
+  }
+  console.log('Close the database connection.');
+});
 
 function MakeTables() {
-	//db.run("CREATE TABLE Departments(subject TEXT PRIMARY KEY, full_name TEXT)");
-	//db.run("CREATE TABLE Courses(subject TEXT PRIMARY KEY, course_number TEXT, credits INTEGER, name TEXT, description TEXT)");
-	//db.run("CREATE TABLE Sections(crn INTEGER PRIMARY KEY, subject TEXT, course_number TEXT, section_number TEXT, building TEXT, room TEXT, professors TEXT, times TEXT, capacity INTEGER, registered TEXT)");
-	//db.run("CREATE TABLE People(university_id INTEGER PRIMARY KEY, position TEXT, password TEXT, first_name TEXT, last_name TEXT, registered_courses TEXT)");
+	db.run("CREATE TABLE Departments(subject TEXT PRIMARY KEY, full_name TEXT)");
+	db.run("CREATE TABLE Courses(subject TEXT PRIMARY KEY, course_number TEXT, credits INTEGER, name TEXT, description TEXT)");
+	db.run("CREATE TABLE Sections(crn INTEGER PRIMARY KEY, subject TEXT, course_number TEXT, section_number TEXT, building TEXT, room TEXT, professors TEXT, times TEXT, capacity INTEGER, registered TEXT)");
+	db.run("CREATE TABLE People(university_id INTEGER PRIMARY KEY, position TEXT, password TEXT, first_name TEXT, last_name TEXT, registered_courses TEXT)");
 	db.run("INSERT INTO Departments SET subject = 'TEST';");
 	db.run("SELECT * FROM Departments");
 }
@@ -84,10 +91,10 @@ function GetData() {
 					if(match != null){
 						//Once receive data call each function
 						var i; 
-						profArr= getProf(body);
-						courseNumArr = getCourseNum(body);
+						profArr       = getProf(body);
+						courseNumArr  = getCourseNum(body);
 						courseNameArr = getCourseName(body);
-						buildArr = getBuild(body);
+						buildArr      = getBuild(body);
 						capArr = getCapacity(body);
 						crnArr = getCRN(body);
 						creditArr = getCredits(body);
@@ -192,7 +199,6 @@ function getProf(str){
 	return profArray;
 	
 }
-
 
 
 //returns array of course and section numbers 
