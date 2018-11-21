@@ -9,7 +9,6 @@ var sqlite = require('sqlite3').verbose();
 //list of all departments to loop through for data
 var depart = ["ACCT","ACSC","ACST","AERO","AMBA","ARAB","ARHS","ARTH","BCHM","BCOM","BETH","BIOL","BLAW","BUSN","CATH","CHDC","CHEM","CHIN","CIED","CISC","CJUS","CLAS","COAC","COJO","COMM","CPSY","CSIS","CSMA","CTED","DRSW","DSCI","DVDM","DVDT","DVHS","DVLS","DVMT","DVPH","DVPM","DVPT","DVSP","DVSS","DVST","ECMP","ECON","EDCE","EDLD","EDUA","EDUC","EGED","ENGL","ENGR","ENTR","ENVR","ESCI","ETLS","EXSC","FAST","FILM","FINC","FREN","GBEC","GENG","GEOG","GEOL","GERM","GIFT","GMUS","GRED","GREK","GRPE","GRSW","GSPA","HIST","HLTH","HONR","HRDO","IBUS","IDSC","IDSW","IDTH","INAC","INCH","INEC","INEG","INFC","INFR","INGR","INHR","INID","INIM","INJP","INLW","INMC","INMG","INMK","INOP","INPS","INRS","INSP","INST","INTR","IRGA","ITAL","JAPN","JOUR","JPST","LATN","LAWS","LEAD","LGST","LHDT","MATH","MBAC","MBEC","MBEN","MBEX","MBFC","MBFR","MBFS","MBGC","MBGM","MBHC","MBHR","MBIF","MBIM","MBIS","MBLW","MBMG","MBMK","MBNP","MBOP","MBQM","MBSK","MBSP","MBST","MBUN","MBVE","MFGS","MGMP","MGMT","MKTG","MMUS","MSQS","MSRA","MUSC","MUSN","MUSP","MUSR","MUSW","NSCI","ODOC","OPMT","PHED","PHIL","PHYS","PLLD","POLS","PSYC","PUBH","QMCS","READ","REAL","RECE","REDP","RUSS","SABC","SABD","SACS","SAED","SAIM","SAIN","SALS","SAMB","SASE","SASW","SEAM","SEIS","SMEE","SOCI","SOWK","SPAN","SPED","SPGT","SPUG","STAT","STEM","TEGR","THEO","THTR","WMST"];
 
-
 var i;
 
 //for loop to go through each department 
@@ -21,9 +20,9 @@ for(i= 0; i < depart.length; i++){
 	//request to St. Thomas URL
 	var request =  {
 		protocol: "https:",
-		hostname: "classes.aws.stthomas.edu", //break up url in search 
+		hostname: "classes.aws.stthomas.edu",  
 		port: 443,
-		path: "/index.htm?year="+year+"&term="+term+"&schoolCode=AS&levelCode=ALL&selectedSubjects="+depart[i], //break up url //when actually write this code will need variables for term, school code and all selected subjects 
+		path: "/index.htm?year="+year+"&term="+term+"&schoolCode=AS&levelCode=ALL&selectedSubjects="+depart[i], 
 		agent: false
 	};
 	
@@ -39,7 +38,7 @@ for(i= 0; i < depart.length; i++){
 		
 		var profArr = []; //Contains Professor Names
 		var courseNameArr = []; //Containes Course Names
-		var buildArr= []; //Contains building name and number
+		var buildArr= []; //Contains an array of objects with building and room number keys
 		var capArr =[]; //Contains capacity of classes
 		var crnArr = []; //Contains CRN of classes
 		var creditArr = []; //Contains credits of classes
@@ -272,7 +271,7 @@ function getCourseName(str){
 	return courseNameArr;	
 }
 
-//returns array of building name and room number 
+//returns an array of objects building name and room number 
 function getBuild(str){
 		var buildArr = [];
 	
@@ -281,24 +280,34 @@ function getBuild(str){
 			if(str[i] === 'l' && str[i+1] === 'o' && str[i+2] === 'c' && str[i+3] === 'a' && str[i+4] === 't' && str[i+5] === 'i' && str[i+6] === 'o' && str[i+7] === 'n' && str[i+8] === 'H' && str[i+9] === 'o'){
 					
 				var pos = i; 
-				var testString = '';
+				var building = "";
+				var roomNumber = "";	
 					
-				while(str[pos] !== '>'){
-						pos++;					
+				while(str[pos] !== 'm'){
+					pos++;
 				}
-				
+					
 				pos++;
-				
-				while(str[pos] !== '<'){
-					if(str[pos] !== '\t'){
-						testString += str[pos];
-					}
-					pos++;					
+				pos++;
+					
+				while(str[pos] !== ','){
+					roomNumber += str[pos];
+					pos++
 				}
 					
-				testString = testString.trim();
-						
-				buildArr.push(testString);		
+				pos++
+					
+				while(str[pos] !== '-'){
+					building += str[pos];
+					pos++
+				}
+				
+				building = building.trim();
+				if(roomNumber == " "){
+					roomNumber = null;
+				}
+				buildArr.push({build: building, room: roomNumber});
+			
 			}		
 		};
 	
