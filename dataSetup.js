@@ -13,7 +13,7 @@ var depart = ["ACCT","ACSC","ACST","AERO","AMBA","ARAB","ARHS","ARTH","BCHM","BC
 var i;
 
 //for loop to go through each department 
-for(i= 1; i < 2; i++){
+for(i= 0; i < depart.length; i++){
 
 	var year = 2019;
 	var term = 20;
@@ -32,19 +32,21 @@ for(i= 1; i < 2; i++){
 	https.get(request, (res) => {
 		//body will contain the large string returned from the St. Thomas site that needs to be parsed 
 		var body = "";
-		//var masterObj = [{subject: "", full-name: "", crn: "", credits: 0, name: "", section: "", building: "", room: "", prof: "", dateTime: [], capacity: 0, registered: ""}]; 
-		var courseNumArr = []; 
-		var profArr = [];
-		var courseNameArr = [];
-		var buildArr= [];
-		var capArr =[];
-		var crnArr = [];
-		var creditArr = [];
-		var courseDescrip = [];
-		var timeArr = [];
-		var subject = "";
-		var subjectCode = "";
-		var fullSubjectName = "";
+		var onlyCourseNumArr = []; //Contains only course numbers
+		var sectionNumArr = []; //Contains only section numbers
+		
+		var courseNumArr = []; //Contains both course and section numbers, DO NOT need to add to database
+		
+		var profArr = []; //Contains Professor Names
+		var courseNameArr = []; //Containes Course Names
+		var buildArr= []; //Contains building name and number
+		var capArr =[]; //Contains capacity of classes
+		var crnArr = []; //Contains CRN of classes
+		var creditArr = []; //Contains credits of classes
+		var courseDescrip = []; //Contains decription of classes
+		var timeArr = []; //Contains day/time of classes
+		var subjectCode = ""; //Contains four letter subject code for the loaded page
+		var fullSubjectName = ""; //Contains the full name of the loaded department page
 	
 		res.on("data", (chunk) =>{
 			body += chunk.toString();
@@ -63,7 +65,6 @@ for(i= 1; i < 2; i++){
 				courseDescrip = getDescrip(body);
 				subject = getSubject(body);
 				timeArr = getTime(body);
-				//subject = getSubject(body);
 				subjectCode = getSubject(body);
 				fullSubjectName = getSubjectName(body);
 				
@@ -71,6 +72,16 @@ for(i= 1; i < 2; i++){
 					console.log(timeArr);
 				
 		
+		
+				//to split out section and course number from courseNumArr
+				for(x= 0; x < courseNumArr.length; x++){
+						 var courseNum = courseNumArr[x];
+						 var split = courseNum.split("-");
+						 onlyCourseNumArr.push(split[0]);
+						 sectionNumArr.push(split[1]);
+				}
+				
+				
 				//testing print statements, can remove later 
 				var j;
 				//console.log("-----------");
@@ -85,8 +96,8 @@ for(i= 1; i < 2; i++){
 				console.log(crnArr.length);
 				console.log(creditArr.length);
 				console.log(courseDescrip.length);
-				
-				console.log(courseDescrip.length);*/
+				console.log(sectionNumArr.length);
+				console.log(onlyCourseNumArr.length);
 			
 				/*for(j=0; j < courseNumArr.length ; j++){
 					console.log(courseNumArr[j]);
@@ -108,14 +119,23 @@ for(i= 1; i < 2; i++){
 				};
 				for(j=0; j < creditArr.length ; j++){
 					console.log(creditArr[j]);
+				};
+				
+				for(j=0; j < onlyCourseNumArr.length ; j++){
+					console.log(onlyCourseNumArr[j]);
+				};
+				for(j=0; j < sectionNumArr.length ; j++){
+					console.log(sectionNumArr[j]);
 				};*/
+			
+				
 				//console.log(subjectCode);
 				//console.log(res.req.path);
 		}); //res.on end
 
 	}); //https.get
 
-} //end of for loop
+//} //end of for loop
 
 
 function setUpTables(){
