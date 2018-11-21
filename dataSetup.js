@@ -45,8 +45,8 @@ for(i= 0; i < depart.length; i++){
 		var creditArr = []; //Contains credits of classes
 		var courseDescrip = []; //Contains decription of classes
 		var timeArr = []; //Contains day/time of classes
-		var subjectCode = ""; //Contains four letter subject code for the loaded page
-		var fullSubjectName = ""; //Contains the full name of the loaded department page
+		var subjectCode = ""; //Contains four letter subject code for the loaded page, will need to add to each line item
+		var fullSubjectName = ""; //Contains the full name of the loaded department page, will need to add to each line item
 	
 		res.on("data", (chunk) =>{
 			body += chunk.toString();
