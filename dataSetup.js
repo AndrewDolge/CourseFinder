@@ -84,9 +84,9 @@ for(i= 0; i < depart.length; i++){
 				
 				//testing print statements, can remove later 
 				var j;
-				//console.log("-----------");
+				console.log("-----------");
 			
-				/*console.log(subjectCode);
+				console.log(subjectCode);
 				console.log(fullSubjectName);
 				console.log(profArr.length);
 				console.log(courseNumArr.length);
@@ -98,6 +98,7 @@ for(i= 0; i < depart.length; i++){
 				console.log(courseDescrip.length);
 				console.log(sectionNumArr.length);
 				console.log(onlyCourseNumArr.length);
+				console.log(timeArr.length);
 			
 				/*for(j=0; j < courseNumArr.length ; j++){
 					console.log(courseNumArr[j]);
@@ -135,7 +136,7 @@ for(i= 0; i < depart.length; i++){
 
 	}); //https.get
 
-//} //end of for loop
+} //end of for loop
 
 
 function setUpTables(){
@@ -218,19 +219,23 @@ function getCourseNum(str){
 					courseNumArr.push(testString);					
 				}
 				
-				/*if(isNaN(str[i+1]) === false && isNaN(str[i+2]) === false && isNaN(str[i+3]) === false && str[i+4] === '-'){
+				else if(isNaN(str[i+1]) === false && isNaN(str[i+2]) === false && isNaN(str[i+3]) === false && str[i+5] === '-'){
+						var pos = 1; 
 					var testString = '';
-					var conc = '';
-					if(str[i+7] === '<'){
-						conc = testString.concat(str[i+1], str[i+2],str[i+3],str[i+4],str[i+5],str[i+6]);
-						courseNumArr.push(conc);
+					
+					while(str[i+pos] !== '<'){
+						if(str[i+pos] !== '\t' && str[i+pos] !== '\n'){
+							testString += str[i+pos];
+						}
+						pos++;					
 					}
+					
+					testString = testString.trim();
 						
-					else if(str[i+8] === '<'){
-						conc = testString.concat(str[i+1], str[i+2],str[i+3],str[i+4],str[i+5],str[i+6], str[i+7]);
-						courseNumArr.push(conc);
-					}					
-				}*/
+					courseNumArr.push(testString);
+					
+				}
+				
 			}
 		
 		};
