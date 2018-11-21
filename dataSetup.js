@@ -4,13 +4,41 @@ var fs     = require('fs');
 var path   = require('path');
 var https  = require('https');
 var url    = require('url'); 
+
 var sqlite = require('sqlite3').verbose();
 
 //list of all departments to loop through for data
 var depart = ["ACCT","ACSC","ACST","AERO","AMBA","ARAB","ARHS","ARTH","BCHM","BCOM","BETH","BIOL","BLAW","BUSN","CATH","CHDC","CHEM","CHIN","CIED","CISC","CJUS","CLAS","COAC","COJO","COMM","CPSY","CSIS","CSMA","CTED","DRSW","DSCI","DVDM","DVDT","DVHS","DVLS","DVMT","DVPH","DVPM","DVPT","DVSP","DVSS","DVST","ECMP","ECON","EDCE","EDLD","EDUA","EDUC","EGED","ENGL","ENGR","ENTR","ENVR","ESCI","ETLS","EXSC","FAST","FILM","FINC","FREN","GBEC","GENG","GEOG","GEOL","GERM","GIFT","GMUS","GRED","GREK","GRPE","GRSW","GSPA","HIST","HLTH","HONR","HRDO","IBUS","IDSC","IDSW","IDTH","INAC","INCH","INEC","INEG","INFC","INFR","INGR","INHR","INID","INIM","INJP","INLW","INMC","INMG","INMK","INOP","INPS","INRS","INSP","INST","INTR","IRGA","ITAL","JAPN","JOUR","JPST","LATN","LAWS","LEAD","LGST","LHDT","MATH","MBAC","MBEC","MBEN","MBEX","MBFC","MBFR","MBFS","MBGC","MBGM","MBHC","MBHR","MBIF","MBIM","MBIS","MBLW","MBMG","MBMK","MBNP","MBOP","MBQM","MBSK","MBSP","MBST","MBUN","MBVE","MFGS","MGMP","MGMT","MKTG","MMUS","MSQS","MSRA","MUSC","MUSN","MUSP","MUSR","MUSW","NSCI","ODOC","OPMT","PHED","PHIL","PHYS","PLLD","POLS","PSYC","PUBH","QMCS","READ","REAL","RECE","REDP","RUSS","SABC","SABD","SACS","SAED","SAIM","SAIN","SALS","SAMB","SASE","SASW","SEAM","SEIS","SMEE","SOCI","SOWK","SPAN","SPED","SPGT","SPUG","STAT","STEM","TEGR","THEO","THTR","WMST"];
 
+db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3')
+// delete old copy of db if it exists
+if (fs.existsSync(db_path)){
+	fs.unlinkSync(db_path);
+}	
+// create and open database connection
+let db = new sqlite.Database(db_path), (err) => {
+	if (err) {
+	  console.error(err.message);
+	}
+	else {
+		console.log('Connected to the course_data database.');
+		MakeTables();
+		GetData();
+	}
+  });
+
+function MakeTables() {
+	
+}
+
+function GetData() {
+	
+}
+
+
 var i;
 
+//setUpTables();
 //for loop to go through each department 
 for(i= 0; i < depart.length; i++){
 
@@ -139,14 +167,18 @@ for(i= 0; i < depart.length; i++){
 
 
 function setUpTables(){
-
-
+	db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3')
+	if (fs.existsSync(db_path)){
+		fs.unlinkSync(db_path);
+	}	
 	//open database connection
-	let db = new sqlite.Database('.' + path.sep + 'db' + path.sep + 'course_data.db', sqlite3.OPEN_READWRITE, (err) => {
+	let db = new sqlite.Database(path.join(__dirname, 'db', 'ust_courses.sqlite3'), (err) => {
 		if (err) {
 		  console.error(err.message);
 		}
-		console.log('Connected to the course_data database.');
+		else {
+			console.log('Connected to the course_data database.');
+		}
 	  });
 
 
