@@ -16,24 +16,29 @@ if (fs.existsSync(db_path)){
 	fs.unlinkSync(db_path);
 }	
 // create and open database connection
-let db = new sqlite.Database( 'ust_courses.sqlite3', (err) => {
+let db = new sqlite.Database(db_path, (err) => {
 	if (err) {
 	  console.error(err.message);
 	}
 	else {
 		console.log('Connected to the course_data database.');
 		MakeTables();
-		//GetData();
+		GetData();
 	}
   });
 
 function MakeTables() {
-	//db.run("CREATE TABLE Departments(subject TEXT PRIMARY KEY, full_name TEXT)");
-	//db.run("CREATE TABLE Courses(subject TEXT PRIMARY KEY, course_number TEXT, credits INTEGER, name TEXT, description TEXT)");
-	//db.run("CREATE TABLE Sections(crn INTEGER PRIMARY KEY, subject TEXT, course_number TEXT, section_number TEXT, building TEXT, room TEXT, professors TEXT, times TEXT, capacity INTEGER, registered TEXT)");
-	//db.run("CREATE TABLE People(university_id INTEGER PRIMARY KEY, position TEXT, password TEXT, first_name TEXT, last_name TEXT, registered_courses TEXT)");
-	db.run("INSERT INTO Departments SET subject = 'TEST';");
-	db.run("SELECT * FROM Departments");
+	db.serialize(()=>{
+		db.run("CREATE TABLE Departments(subject TEXT PRIMARY KEY, full_name TEXT)");
+		db.run("CREATE TABLE Courses(subject TEXT, course_number TEXT, credits INTEGER, name TEXT, description TEXT)");
+		db.run("CREATE TABLE Sections(crn INTEGER PRIMARY KEY, subject TEXT, course_number TEXT, section_number TEXT, building TEXT, room TEXT, professors TEXT, times TEXT, capacity INTEGER, registered TEXT)");
+		db.run("CREATE TABLE People(university_id INTEGER PRIMARY KEY, position TEXT, password TEXT, first_name TEXT, last_name TEXT, registered_courses TEXT)");
+		/*db.run("INSERT INTO Departments(subject,full_name) VALUES ('CISC','Computer and Info Sci')");
+		db.run("INSERT INTO Departments(subject,full_name) VALUES ('STAT','Statistics')");
+		db.all("SELECT * FROM Departments",(err,rows)=>{
+			console.log(rows);
+		});*/
+	});
 }
 
 function GetData() {
@@ -97,7 +102,7 @@ function GetData() {
 						subjectCode = getSubject(body);
 						fullSubjectName = getSubjectName(body);
 						
-							console.log(subjectCode + ": " + fullSubjectName);
+							//console.log(subjectCode + ": " + fullSubjectName);
 							//console.log(timeArr);
 						
 				
@@ -109,6 +114,14 @@ function GetData() {
 								 onlyCourseNumArr.push(split[0]);
 								 sectionNumArr.push(split[1]);
 						}
+						
+						///////////////////////////////////////////
+						//            Insert statements          //
+						db.serialize(()=>{
+							db.run("INSERT INTO Departments(subject, full_name) VALUES ('"+subjectCode+"','"+fullSubjectName+"');");
+						});
+						///////////////////////////////////////////
+						
 						
 						
 						//testing print statements, can remove later 
