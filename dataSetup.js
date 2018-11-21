@@ -10,13 +10,13 @@ var sqlite = require('sqlite3').verbose();
 //list of all departments to loop through for data
 var depart = ["ACCT","ACSC","ACST","AERO","AMBA","ARAB","ARHS","ARTH","BCHM","BCOM","BETH","BIOL","BLAW","BUSN","CATH","CHDC","CHEM","CHIN","CIED","CISC","CJUS","CLAS","COAC","COJO","COMM","CPSY","CSIS","CSMA","CTED","DRSW","DSCI","DVDM","DVDT","DVHS","DVLS","DVMT","DVPH","DVPM","DVPT","DVSP","DVSS","DVST","ECMP","ECON","EDCE","EDLD","EDUA","EDUC","EGED","ENGL","ENGR","ENTR","ENVR","ESCI","ETLS","EXSC","FAST","FILM","FINC","FREN","GBEC","GENG","GEOG","GEOL","GERM","GIFT","GMUS","GRED","GREK","GRPE","GRSW","GSPA","HIST","HLTH","HONR","HRDO","IBUS","IDSC","IDSW","IDTH","INAC","INCH","INEC","INEG","INFC","INFR","INGR","INHR","INID","INIM","INJP","INLW","INMC","INMG","INMK","INOP","INPS","INRS","INSP","INST","INTR","IRGA","ITAL","JAPN","JOUR","JPST","LATN","LAWS","LEAD","LGST","LHDT","MATH","MBAC","MBEC","MBEN","MBEX","MBFC","MBFR","MBFS","MBGC","MBGM","MBHC","MBHR","MBIF","MBIM","MBIS","MBLW","MBMG","MBMK","MBNP","MBOP","MBQM","MBSK","MBSP","MBST","MBUN","MBVE","MFGS","MGMP","MGMT","MKTG","MMUS","MSQS","MSRA","MUSC","MUSN","MUSP","MUSR","MUSW","NSCI","ODOC","OPMT","PHED","PHIL","PHYS","PLLD","POLS","PSYC","PUBH","QMCS","READ","REAL","RECE","REDP","RUSS","SABC","SABD","SACS","SAED","SAIM","SAIN","SALS","SAMB","SASE","SASW","SEAM","SEIS","SMEE","SOCI","SOWK","SPAN","SPED","SPGT","SPUG","STAT","STEM","TEGR","THEO","THTR","WMST"];
 
-db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3')
+db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3');
 // delete old copy of db if it exists
 if (fs.existsSync(db_path)){
 	fs.unlinkSync(db_path);
 }	
 // create and open database connection
-let db = new sqlite.Database(db_path, (err) => {
+let db = new sqlite.Database('ust_courses.sqlite3', (err) => {
 	if (err) {
 	  console.error(err.message);
 	}
@@ -32,139 +32,103 @@ function MakeTables() {
 }
 
 function GetData() {
-	
+	var i;
+
+	//setUpTables();
+	//for loop to go through each department 
+	for(i= 0; i < depart.length; i++){
+		var year = 2019;
+		var term = 20;
+
+		//request to St. Thomas URL
+		var request =  {
+			protocol: "https:",
+			hostname: "classes.aws.stthomas.edu",  
+			port: 443,
+			path: "/index.htm?year="+year+"&term="+term+"&schoolCode=AS&levelCode=ALL&selectedSubjects="+depart[i], 
+			agent: false
+		};
+		
+		/*The received info is one large string, so on receiving info we call various functions to parse the string for the info we need
+		  Each function just finds the correct class the information is labeled under for each course and returns it in an array*/
+		https.get(request, (res) => {
+			//body will contain the large string returned from the St. Thomas site that needs to be parsed 
+			var body = "";
+			var onlyCourseNumArr = []; //Contains only course numbers
+			var sectionNumArr = []; //Contains only section numbers
+			
+			var courseNumArr = []; //Contains both course and section numbers, DO NOT need to add to database
+			
+			var profArr = []; //Contains Professor Names
+			var courseNameArr = []; //Containes Course Names
+			var buildArr= []; //Contains an array of objects with building and room number keys
+			var capArr =[]; //Contains capacity of classes
+			var crnArr = []; //Contains CRN of classes
+			var creditArr = []; //Contains credits of classes
+			var courseDescrip = []; //Contains decription of classes
+			var timeArr = []; //Contains day/time of classes
+			var subjectCode = ""; //Contains four letter subject code for the loaded page, will need to add to each line item
+			var fullSubjectName = ""; //Contains the full name of the loaded department page, will need to add to each line item
+		
+			res.on("data", (chunk) =>{
+				body += chunk.toString();
+			});
+			res.on("end", () => {
+					var pattern = /(<h3 style="margin-top:1.5rem">).+<\/h3>/g;
+					var match = body.match(pattern);
+						if(match != null){
+						//Once receive data call each function
+						var i; 
+						profArr= getProf(body);
+						courseNumArr = getCourseNum(body);
+						courseNameArr = getCourseName(body);
+						buildArr = getBuild(body);
+						capArr = getCapacity(body);
+						crnArr = getCRN(body);
+						creditArr = getCredits(body);
+						courseDescrip = getDescrip(body);
+						subject = getSubject(body);
+						timeArr = getTime(body);
+						subjectCode = getSubject(body);
+						fullSubjectName = getSubjectName(body);
+						
+							console.log(subjectCode + ": " + fullSubjectName);
+							console.log(timeArr);
+						
+				
+				
+						//to split out section and course number from courseNumArr
+						for(x= 0; x < courseNumArr.length; x++){
+								 var courseNum = courseNumArr[x];
+								 var split = courseNum.split("-");
+								 onlyCourseNumArr.push(split[0]);
+								 sectionNumArr.push(split[1]);
+						}
+						
+						
+						//testing print statements, can remove later 
+						var j;
+						console.log("-----------");
+					
+						console.log(subjectCode);
+						console.log(fullSubjectName);
+						console.log(profArr.length);
+						console.log(courseNumArr.length);
+						console.log(buildArr.length);
+						console.log(capArr.length);
+						console.log(courseNameArr.length);
+						console.log(crnArr.length);
+						console.log(creditArr.length);
+						console.log(courseDescrip.length);
+						console.log(sectionNumArr.length);
+						console.log(onlyCourseNumArr.length);
+						console.log(timeArr.length);
+						}
+			}); //res.on end
+
+		}); //https.get
+	} //end of for loop	
 }
-
-
-var i;
-
-//setUpTables();
-//for loop to go through each department 
-for(i= 0; i < depart.length; i++){
-
-	var year = 2019;
-	var term = 20;
-
-	//request to St. Thomas URL
-	var request =  {
-		protocol: "https:",
-		hostname: "classes.aws.stthomas.edu",  
-		port: 443,
-		path: "/index.htm?year="+year+"&term="+term+"&schoolCode=AS&levelCode=ALL&selectedSubjects="+depart[i], 
-		agent: false
-	};
-	
-	/*The received info is one large string, so on receiving info we call various functions to parse the string for the info we need
-	  Each function just finds the correct class the information is labeled under for each course and returns it in an array*/
-	https.get(request, (res) => {
-		//body will contain the large string returned from the St. Thomas site that needs to be parsed 
-		var body = "";
-		var onlyCourseNumArr = []; //Contains only course numbers
-		var sectionNumArr = []; //Contains only section numbers
-		
-		var courseNumArr = []; //Contains both course and section numbers, DO NOT need to add to database
-		
-		var profArr = []; //Contains Professor Names
-		var courseNameArr = []; //Containes Course Names
-		var buildArr= []; //Contains an array of objects with building and room number keys
-		var capArr =[]; //Contains capacity of classes
-		var crnArr = []; //Contains CRN of classes
-		var creditArr = []; //Contains credits of classes
-		var courseDescrip = []; //Contains decription of classes
-		var timeArr = []; //Contains day/time of classes
-		var subjectCode = ""; //Contains four letter subject code for the loaded page, will need to add to each line item
-		var fullSubjectName = ""; //Contains the full name of the loaded department page, will need to add to each line item
-	
-		res.on("data", (chunk) =>{
-			body += chunk.toString();
-		});
-		res.on("end", () => {
-			
-				//Once receive data call each function
-				var i; 
-				profArr= getProf(body);
-				courseNumArr = getCourseNum(body);
-				courseNameArr = getCourseName(body);
-				buildArr = getBuild(body);
-				capArr = getCapacity(body);
-				crnArr = getCRN(body);
-				creditArr = getCredits(body);
-				courseDescrip = getDescrip(body);
-				subject = getSubject(body);
-				timeArr = getTime(body);
-				subjectCode = getSubject(body);
-				fullSubjectName = getSubjectName(body);
-				
-					//console.log(subjectCode + ": " + fullSubjectName);
-					//console.log(timeArr);*/
-				
-		
-		
-				//to split out section and course number from courseNumArr
-				for(x= 0; x < courseNumArr.length; x++){
-						 var courseNum = courseNumArr[x];
-						 var split = courseNum.split("-");
-						 onlyCourseNumArr.push(split[0]);
-						 sectionNumArr.push(split[1]);
-				}
-				
-				
-				//testing print statements, can remove later 
-				var j;
-				/*console.log("-----------");
-			
-				console.log(subjectCode);
-				console.log(fullSubjectName);
-				console.log(profArr.length);
-				console.log(courseNumArr.length);
-				console.log(buildArr.length);
-				console.log(capArr.length);
-				console.log(courseNameArr.length);
-				console.log(crnArr.length);
-				console.log(creditArr.length);
-				console.log(courseDescrip.length);
-				console.log(sectionNumArr.length);
-				console.log(onlyCourseNumArr.length);
-				console.log(timeArr.length);*/
-			
-				/*for(j=0; j < courseNumArr.length ; j++){
-					console.log(courseNumArr[j]);
-				};
-				for(j=0; j < profArr.length ; j++){
-					console.log(profArr[j]);
-				};
-				for(j=0; j < courseNameArr.length ; j++){
-					console.log(courseNameArr[j]);
-				};
-				for(j=0; j < buildArr.length ; j++){
-					console.log(buildArr[j]);
-				};
-				for(j=0; j < capArr.length ; j++){
-					console.log(capArr[j]);
-				};
-				for(j=0; j < crnArr.length ; j++){
-					console.log(crnArr[j]);
-				};
-				for(j=0; j < creditArr.length ; j++){
-					console.log(creditArr[j]);
-				};
-				
-				for(j=0; j < onlyCourseNumArr.length ; j++){
-					console.log(onlyCourseNumArr[j]);
-				};
-				for(j=0; j < sectionNumArr.length ; j++){
-					console.log(sectionNumArr[j]);
-				};*/
-			
-				
-				//console.log(subjectCode);
-				//console.log(res.req.path);
-		}); //res.on end
-
-	}); //https.get
-
-} //end of for loop
-
 
 function setUpTables(){
 	db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3')
