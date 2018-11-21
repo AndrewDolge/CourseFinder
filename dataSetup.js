@@ -26,13 +26,6 @@ let db = new sqlite.Database(db_path, (err) => {
 		GetData();
 	}
   });
-/*	
-db.close((err) => {
-  if (err) {
-    return console.error(err.message);
-  }
-  console.log('Close the database connection.');
-}); */
 
 function MakeTables() {
 	db.serialize(()=>{
@@ -71,7 +64,7 @@ function GetData() {
 		https.get(request, (res) => {
 			//body will contain the large string returned from the St. Thomas site that needs to be parsed 
 			var body = "";
-			var onlyCourseNumArr = []; //Contains only course numbers
+			
 			var sectionNumArr = []; //Contains only section numbers
 			
 			var courseNumArr = []; //Contains both course and section numbers, DO NOT need to add to database
@@ -86,6 +79,14 @@ function GetData() {
 			var timeArr = []; //Contains day/time of classes
 			var subjectCode = ""; //Contains four letter subject code for the loaded page, will need to add to each line item
 			var fullSubjectName = ""; //Contains the full name of the loaded department page, will need to add to each line item
+			var courseSecNum = []; //contains one course number for every individual course offered in a given semester, regardless of number of sections
+			
+			///special vars for course array
+			var onlyCourseNumArr = []; //Contains only course numbers
+			var onlyCourseDesc = [];
+			var onlyCourseCred = [];
+			var onlyCourseName = [];
+			
 		
 			res.on("data", (chunk) =>{
 				body += chunk.toString();
@@ -96,10 +97,10 @@ function GetData() {
 					if(match != null){
 						//Once receive data call each function
 						var i; 
-						profArr       = getProf(body);
-						courseNumArr  = getCourseNum(body);
+						profArr= getProf(body);
+						courseNumArr = getCourseNum(body);
 						courseNameArr = getCourseName(body);
-						buildArr      = getBuild(body);
+						buildArr = getBuild(body);
 						capArr = getCapacity(body);
 						crnArr = getCRN(body);
 						creditArr = getCredits(body);
@@ -108,6 +109,8 @@ function GetData() {
 						timeArr = getTime(body);
 						subjectCode = getSubject(body);
 						fullSubjectName = getSubjectName(body);
+						
+						//console.log(subjectCode);
 						
 							//console.log(subjectCode + ": " + fullSubjectName);
 							//console.log(timeArr);
@@ -118,17 +121,31 @@ function GetData() {
 						for(x= 0; x < courseNumArr.length; x++){
 								 var courseNum = courseNumArr[x];
 								 var split = courseNum.split("-");
-								 onlyCourseNumArr.push(split[0]);
+								 var unique = split[0];
+								 if(unique != onlyCourseNumArr[onlyCourseNumArr.length - 1]){
+									onlyCourseNumArr.push(split[0]);
+									onlyCourseDesc.push(courseDescrip[x]);
+									onlyCourseCred.push(creditArr[x]);
+									onlyCourseName.push(courseNameArr[x]);
+								 }
+								 courseSecNum.push(split[0]);
 								 sectionNumArr.push(split[1]);
 						}
 						
 						///////////////////////////////////////////
 						//            Insert statements          //
 						db.serialize(()=>{
-							db.run("INSERT INTO Departments(subject, full_name) VALUES (\""+subjectCode+"\",\""+fullSubjectName+"\");", (err) => {
-
-								console.log(err + subjectCode);
+							db.run("INSERT INTO Departments(subject, full_name) VALUES (\""+subjectCode+"\",\""+fullSubjectName+"\");", (err)=>{
+								//console.log(err);
 							});
+							var j;
+							for(j=0; j<onlyCourseNumArr.length; j++){
+								db.run("INSERT INTO Courses(subject, course_number, credits, name, description) VALUES (\""+subjectCode+"\",\""+onlyCourseNumArr[j]+"\",\""+onlyCourseCred[j]+"\",\""+onlyCourseName[j]+"\",\""+onlyCourseDesc[j]+"\");", (err)=>{
+								//console.log(err);
+								//console.log(subjectCode +": "+courseNameArr[j]);
+							});
+								
+							}
 						});
 						///////////////////////////////////////////
 						
@@ -215,6 +232,7 @@ function getProf(str){
 	return profArray;
 	
 }
+
 
 
 //returns array of course and section numbers 
