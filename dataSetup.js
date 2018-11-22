@@ -130,80 +130,50 @@ function GetData() {
 								 }
 								 courseSecNum.push(split[0]);
 								 sectionNumArr.push(split[1]);
+								 
 						}
 						
+			
 						///////////////////////////////////////////
 						//            Insert statements          //
 						db.serialize(()=>{
+							
 							db.run("INSERT INTO Departments(subject, full_name) VALUES (\""+subjectCode+"\",\""+fullSubjectName+"\");", (err)=>{
-								//console.log(err);
+								//console.log(err);	
 							});
+							
 							var j;
 							for(j=0; j<onlyCourseNumArr.length; j++){
 								db.run("INSERT INTO Courses(subject, course_number, credits, name, description) VALUES (\""+subjectCode+"\",\""+onlyCourseNumArr[j]+"\",\""+onlyCourseCred[j]+"\",\""+onlyCourseName[j]+"\",\""+onlyCourseDesc[j]+"\");", (err)=>{
 								//console.log(err);
-								//console.log(subjectCode +": "+courseNameArr[j]);
-							});
+								//console.log(err +": "+subjectCode);
+								
+
+								});
+								
+							}
+							
+							//works and the rest Dont need quotes for integers add the rest!
+							var y
+							for(y=0; y < courseSecNum.length; y++){
+								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors) VALUES (\""+crnArr[y]+"\",\""+subjectCode+"\",\""+courseSecNum[y]+"\",\""+sectionNumArr[y]+"\",\""+buildArr[y].build+"\",\""+buildArr[y].room+"\",\""+profArr[y]+"\");", (err) => {
+										console.log(err +": " +subjectCode);
+									});
 								
 							}
 						});
 						///////////////////////////////////////////
 						
-						
-						
-						//testing print statements, can remove later 
-						var j;
-						/*console.log("-----------");
 					
-						console.log(subjectCode);
-						console.log(fullSubjectName);
-						console.log(profArr.length);
-						console.log(courseNumArr.length);
-						console.log(buildArr.length);
-						console.log(capArr.length);
-						console.log(courseNameArr.length);
-						console.log(crnArr.length);
-						console.log(creditArr.length);
-						console.log(courseDescrip.length);
-						console.log(sectionNumArr.length);
-						console.log(onlyCourseNumArr.length);
-						console.log(timeArr.length);*/
-						}
+						
+							
+					} //if(match!= null)
 			}); //res.on end
 
 		}); //https.get
 	} //end of for loop	
 }
 
-/*function setUpTables(){
-	db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3')
-	if (fs.existsSync(db_path)){
-		fs.unlinkSync(db_path);
-	}	
-	//open database connection
-	let db = new sqlite.Database(path.join(__dirname, 'db', 'ust_courses.sqlite3'), (err) => {
-		if (err) {
-		  console.error(err.message);
-		}
-		else {
-			console.log('Connected to the course_data database.');
-		}
-	  });
-
-
-
-
-	  //close the database connection
-	  db.close((err) => {
-		if (err) {
-		  console.error(err.message);
-		}
-		console.log('Close the database connection.');
-	  });
-
-
-
-}*/
 
 
 //returns array of professors 
@@ -314,45 +284,95 @@ function getCourseName(str){
 
 //returns an array of objects building name and room number 
 function getBuild(str){
-		var buildArr = [];
 	
+	var buildArr = [];
 		var i;
+		
 		for (i= 0; i < str.length ; i++){
 			if(str[i] === 'l' && str[i+1] === 'o' && str[i+2] === 'c' && str[i+3] === 'a' && str[i+4] === 't' && str[i+5] === 'i' && str[i+6] === 'o' && str[i+7] === 'n' && str[i+8] === 'H' && str[i+9] === 'o'){
-					
+				
+				
 				var pos = i; 
 				var building = "";
-				var roomNumber = "";	
-					
-				while(str[pos] !== 'm'){
+				var roomNumber = "";
+				var lowerLevel = false;
+				
+				while(str[pos] !== '>'){
 					pos++;
 				}
-					
+				
 				pos++;
-				pos++;
+				//Test to see if room number contains LL
+				while(str[pos] !== '<'){
+					if(str[pos] === 'L' && str[pos+1] === 'L' && isNaN(str[pos+2]) === false){
+						lowerLevel = true;
+					}
 					
-				while(str[pos] !== ','){
-					roomNumber += str[pos];
-					pos++
-				}
-					
-				pos++
-					
-				while(str[pos] !== '-'){
-					building += str[pos];
-					pos++
+					pos++;
 				}
 				
+				//If a room number contains LL
+				if(lowerLevel === true){
+					pos = i;
+					
+					while(str[pos] !== '>'){
+						pos++;
+					}
+					
+					pos++;
+					while(str[pos] !== '<'){
+						if(building.length < 3 && str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
+							building += str[pos];
+						}
+						
+						else if(building.length >= 3 && str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
+							roomNumber += str[pos];	
+						}
+						pos++;	
+					}
+					
+				}
+				//If a room number does not contain LL
+				if(lowerLevel === false){
+					pos =i;
+					while(str[pos] !== '>'){
+						pos++;
+					}
+					
+					pos++;
+						
+					while(str[pos] !== '<'){
+						if(str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
+							if(isNaN(str[pos]) === false || str[pos] === ','){
+									roomNumber += str[pos];
+								}
+								
+							if(isNaN(str[pos]) === true || str[pos] === ','){
+									building += str[pos];
+								}
+								
+						}
+						pos++;
+					}
+				}
+				
+				
 				building = building.trim();
-				if(roomNumber == " "){
+
+				if(roomNumber.length == 0){
 					roomNumber = null;
 				}
+				
+				if(roomNumber !== null){
+					roomNumber = roomNumber.trim();
+				}
+				
 				buildArr.push({build: building, room: roomNumber});
-			
-			}		
-		};
-	
+			}				
+		}	
+
 	return buildArr;	
+	
 }
 
 //returns array of capacity sizes
@@ -468,7 +488,9 @@ function getDescrip(str){
 				var pos = 12; 
 				var testString = '';
 				while(str[i+pos] !== '<'){
-					if(str[i+pos] !== '\t' && str[i+pos]!== '\n'){
+					//Solved error when loading description data by removing quotations
+					if(str[i+pos] !== '\t' && str[i+pos]!== '\n' && str[i+pos] !== '"' && str[i+pos] !== "'"){
+					
 						testString += str[i+pos];
 						
 					}
