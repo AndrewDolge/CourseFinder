@@ -157,7 +157,7 @@ function GetData() {
 							var time = "time";
 							for(k=0; k<crnArr.length; k++){
 								//need to seperate room and building
-								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (\""+crnArr[k]+"\",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+time+"\",\""+capArr[k]+"\",\""+registered+"\");", (err)=>{
+								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (\""+crnArr[k]+"\",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+timeArr[k]+"\",\""+capArr[k]+"\",\""+registered+"\");", (err)=>{
 									//console.log(err);
 									//console.log(subjectCode +": "+courseNameArr[j]);
 								});
