@@ -152,14 +152,15 @@ function GetData() {
 								});
 								
 							}
-							
-							//works and the rest Dont need quotes for integers add the rest!
-							var y
-							for(y=0; y < courseSecNum.length; y++){
-								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors) VALUES (\""+crnArr[y]+"\",\""+subjectCode+"\",\""+courseSecNum[y]+"\",\""+sectionNumArr[y]+"\",\""+buildArr[y].build+"\",\""+buildArr[y].room+"\",\""+profArr[y]+"\");", (err) => {
-										console.log(err +": " +subjectCode);
-									});
-								
+							var k;
+							var registered = "registered";
+							var time = "time";
+							for(k=0; k<crnArr.length; k++){
+								//need to seperate room and building
+								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (\""+crnArr[k]+"\",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+time+"\",\""+capArr[k]+"\",\""+registered+"\");", (err)=>{
+									//console.log(err);
+									//console.log(subjectCode +": "+courseNameArr[j]);
+								});
 							}
 						});
 						///////////////////////////////////////////
@@ -173,8 +174,6 @@ function GetData() {
 		}); //https.get
 	} //end of for loop	
 }
-
-
 
 //returns array of professors 
 function getProf(str){
@@ -202,8 +201,6 @@ function getProf(str){
 	return profArray;
 	
 }
-
-
 
 //returns array of course and section numbers 
 function getCourseNum(str){
