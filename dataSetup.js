@@ -100,15 +100,16 @@ function GetData() {
 						profArr= getProf(body);
 						courseNumArr = getCourseNum(body);
 						courseNameArr = getCourseName(body);
-						buildArr = getBuild(body);
+						//buildArr = getBuild(body);
 						capArr = getCapacity(body);
 						crnArr = getCRN(body);
 						creditArr = getCredits(body);
 						courseDescrip = getDescrip(body);
-						subject = getSubject(body);
+						//subject = getSubject(body);
 						timeArr = getTime(body);
 						subjectCode = getSubject(body);
 						fullSubjectName = getSubjectName(body);
+						buildArr = getBuild(body,subjectCode);
 						
 						//console.log(subjectCode);
 						
@@ -156,10 +157,10 @@ function GetData() {
 							var registered = "registered";
 							var time = "time";
 							for(k=0; k<crnArr.length; k++){
-								//need to seperate room and building
+								
 								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (\""+crnArr[k]+"\",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+timeArr[k]+"\",\""+capArr[k]+"\",\""+registered+"\");", (err)=>{
-									//console.log(err);
-									//console.log(subjectCode +": "+courseNameArr[j]);
+									console.log(err);
+									console.log(subjectCode +": "+courseNameArr[j]);
 								});
 							}
 						});
@@ -280,7 +281,7 @@ function getCourseName(str){
 }
 
 //returns an array of objects building name and room number 
-function getBuild(str){
+function getBuild(str, subjectCode){
 	
 	var buildArr = [];
 		var i;
@@ -299,60 +300,148 @@ function getBuild(str){
 				}
 				
 				pos++;
-				//Test to see if room number contains LL
-				while(str[pos] !== '<'){
-					if(str[pos] === 'L' && str[pos+1] === 'L' && isNaN(str[pos+2]) === false){
-						lowerLevel = true;
+				
+				//Specific case for CATH since their buliding starts with numbers
+				if(subjectCode === 'CATH'){
+					var pos2 = pos;
+					var fullString = '';
+					while(str[pos2] !== '<'){
+						if(str[pos2] !== '\n' && str[pos2] !== '\t'){
+							fullString += str[pos2];
+						}
+						pos2++;
 					}
 					
-					pos++;
+					fullString = fullString.trim();
+					building += fullString[0] + fullString[1] + fullString[2];
+					
+					if(fullString.length > 4){
+						var q;
+						for(q = 4; q < fullString.length; q++){
+							roomNumber += fullString[q];
+						}
+					}
+					
 				}
 				
-				//If a room number contains LL
-				if(lowerLevel === true){
-					pos = i;
+				else{
+				
+					//Test to see if room number contains LL
 					
-					while(str[pos] !== '>'){
+					while(str[pos] !== '<'){
+						if(str[pos] === 'L' && str[pos+1] === 'L' && isNaN(str[pos+2]) === false){
+							lowerLevel = true;
+						}
+						
 						pos++;
 					}
 					
-					pos++;
-					while(str[pos] !== '<'){
-						if(building.length < 3 && str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
-							building += str[pos];
-						}
+					//If a room number contains LL, first check if multiple rooms then parse out room and building 
+					if(lowerLevel === true){
+						pos = i;
 						
-						else if(building.length >= 3 && str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
-							roomNumber += str[pos];	
+						//Check for multiple rooms
+						var isComma = false;
+						while(str[pos] !== '>'){
+							pos++;
 						}
-						pos++;	
-					}
-					
-				}
-				//If a room number does not contain LL
-				if(lowerLevel === false){
-					pos =i;
-					while(str[pos] !== '>'){
 						pos++;
-					}
-					
-					pos++;
 						
-					while(str[pos] !== '<'){
-						if(str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
-							if(isNaN(str[pos]) === false || str[pos] === ','){
+						
+						while(str[pos] !== '<'){
+							if(str[pos] === ','){
+								isComma = true;
+							}
+							pos++;
+						}
+						
+						if(isComma === true){
+							pos = i;
+							while(str[pos] !== '>'){
+								pos++;
+							}
+							pos++;
+							
+							while(building.length < 3){
+								if(str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
+									building += str[pos];
+								}
+								pos++;
+							}
+							while(str[pos] !== ','){
+								if(str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
 									roomNumber += str[pos];
 								}
-								
-							if(isNaN(str[pos]) === true || str[pos] === ','){
+								pos++;
+							}
+							
+							roomNumber += ',';
+							
+							while(building.length < 7){
+								if(str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
+									building += str[pos];
+								}
+								pos++;
+							}
+							
+							while(str[pos] !== '<'){
+								if(str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
+									roomNumber += str[pos];
+								}
+								pos++;
+							}
+							
+							
+						}
+						
+						if(isComma === false){
+							
+							pos = i;
+							while(str[pos] !== '>'){
+								pos++;
+							}
+							
+							pos++;
+						
+							while(str[pos] !== '<'){
+								if(building.length < 3 && str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
 									building += str[pos];
 								}
 								
+								else if(building.length >= 3 && str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
+									roomNumber += str[pos];	
+								}
+								pos++;	
+							}
 						}
+						
+					} //if(lowerLevel === true)
+						
+					//If a room number does not contain LL
+					if(lowerLevel === false){
+						pos =i;
+						while(str[pos] !== '>'){
+							pos++;
+						}
+						
 						pos++;
-					}
-				}
+							
+						while(str[pos] !== '<'){
+							if(str[pos] !== '\n' && str[pos] !== '\t' && str[pos] !== " "){
+								if(isNaN(str[pos]) === false || str[pos] === ','){
+										roomNumber += str[pos];
+									}
+									
+								if(isNaN(str[pos]) === true || str[pos] === ','){
+										building += str[pos];
+									}
+									
+							}
+							pos++;
+						} //while(str[pos] !== '<')
+					} //if(lowerLevel === false)
 				
+				} //else
 				
 				building = building.trim();
 
@@ -362,6 +451,12 @@ function getBuild(str){
 				
 				if(roomNumber !== null){
 					roomNumber = roomNumber.trim();
+					if(roomNumber.length == 4){
+						//if half online and half in classroom used to remove unneeded comma seperator
+						if(roomNumber[0] === ',' || roomNumber[3] === ','){
+							roomNumber = roomNumber.replace(',','');
+						}
+					}
 				}
 				
 				buildArr.push({build: building, room: roomNumber});
