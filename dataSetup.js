@@ -100,12 +100,12 @@ function GetData() {
 						profArr= getProf(body);
 						courseNumArr = getCourseNum(body);
 						courseNameArr = getCourseName(body);
-						//buildArr = getBuild(body);
+						
 						capArr = getCapacity(body);
 						crnArr = getCRN(body);
 						creditArr = getCredits(body);
 						courseDescrip = getDescrip(body);
-						//subject = getSubject(body);
+
 						timeArr = getTime(body);
 						subjectCode = getSubject(body);
 						fullSubjectName = getSubjectName(body);
@@ -159,8 +159,8 @@ function GetData() {
 							for(k=0; k<crnArr.length; k++){
 								
 								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (\""+crnArr[k]+"\",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+timeArr[k]+"\",\""+capArr[k]+"\",\""+registered+"\");", (err)=>{
-									console.log(err);
-									console.log(subjectCode +": "+courseNameArr[j]);
+									//console.log(err);
+									//console.log(subjectCode +": "+courseNameArr[j]);
 								});
 							}
 						});
@@ -194,8 +194,14 @@ function getProf(str){
 					}
 					
 					testString = testString.trim();
-						
-					profArray.push(testString);		
+					
+					if(testString !== ''){
+						profArray.push(testString);		
+					}
+					
+					else{
+						profArray.push(null);
+					}
 				}		
 	};
 	
@@ -301,10 +307,22 @@ function getBuild(str, subjectCode){
 				
 				pos++;
 				
-				//Specific case for CATH since their buliding starts with numbers
-				if(subjectCode === 'CATH'){
+				var check = pos;
+				var stringCheck = '';
+				while(str[check] !== '<'){
+					if(str[check] !== '\n' && str[check] !== '\t'){
+						stringCheck += str[check];
+					}
+					check++;
+				}
+				stringCheck = stringCheck.trim();
+				
+				//One building begins with 55
+				if(stringCheck[0] === '5' && stringCheck[1] === '5'){
 					var pos2 = pos;
 					var fullString = '';
+					
+					pos2 = pos;
 					while(str[pos2] !== '<'){
 						if(str[pos2] !== '\n' && str[pos2] !== '\t'){
 							fullString += str[pos2];
@@ -321,7 +339,7 @@ function getBuild(str, subjectCode){
 							roomNumber += fullString[q];
 						}
 					}
-					
+							
 				}
 				
 				else{
@@ -433,7 +451,12 @@ function getBuild(str, subjectCode){
 									}
 									
 								if(isNaN(str[pos]) === true || str[pos] === ','){
-										building += str[pos];
+										if(isNaN(str[pos-1]) === false && str[pos] === 'A' && str[pos+1] !== 'R' && building.length > 1){
+											roomNumber += str[pos];
+										}
+										else{
+											building += str[pos];
+										}
 									}
 									
 							}
