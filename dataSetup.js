@@ -1,4 +1,3 @@
-//Currently node js file is looping through each department and grabbing necessary information. Still need to place data in database. 
 
 var fs     = require('fs');
 var path   = require('path');
@@ -24,6 +23,8 @@ let db = new sqlite.Database(db_path, (err) => {
 		console.log('Connected to the course_data database.');
 		MakeTables();
 		GetData();
+		createIndex();
+		
 	}
   });
 
@@ -39,6 +40,16 @@ function MakeTables() {
 			console.log(rows);
 		});*/
 	});
+}
+
+function createIndex(){
+	//Indexes created for common SQL searches, each table can have multiple indexes
+	db.serialize(()=>{
+		db.run("CREATE INDEX first_index ON Courses(name)");
+		db.run("CREATE INDEX second_index ON Sections(crn)");
+		db.run("CREATE INDEX third_index ON Sections(course_number)");
+		db.run("CREATE UNIQUE INDEX fourth_index ON Departments(subject)");
+	})
 }
 
 function GetData() {
@@ -160,7 +171,7 @@ function GetData() {
 								
 								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (\""+crnArr[k]+"\",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+timeArr[k]+"\",\""+capArr[k]+"\",\""+registered+"\");", (err)=>{
 									//console.log(err);
-									//console.log(subjectCode +": "+courseNameArr[j]);
+									console.log(subjectCode +": "+courseNameArr[j]);
 								});
 							}
 						});
@@ -174,6 +185,7 @@ function GetData() {
 
 		}); //https.get
 	} //end of for loop	
+	
 }
 
 //returns array of professors 
