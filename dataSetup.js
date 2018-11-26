@@ -128,17 +128,6 @@ function GetData() {
 						fullSubjectName = getSubjectName(body);
 						buildArr = getBuild(body,subjectCode);
 
-						
-						
-						//console.log(subjectCode);
-						
-							//console.log(subjectCode + ": " + fullSubjectName);
-							//console.log(timeArr);
-							//console.log("name length: " + courseNameArr.length)
-							//console.log("time length: "+ timeArr.length)
-							//console.log(timeArr)
-						
-				
 				
 						//to split out section and course number from courseNumArr
 						for(let x= 0; x < courseNumArr.length; x++){
@@ -161,7 +150,7 @@ function GetData() {
 						//            Insert statements          //
 						db.serialize(()=>{
 							
-							db.prepare("INSERT INTO Departments(subject, full_name) VALUES (?, ?);")
+							db.prepare("INSERT INTO Departments(subject, full_name) VALUES (?,?);")
 							  .bind([subjectCode, fullSubjectName])
 							  .run((err)=>{
 									if(err){
@@ -173,6 +162,7 @@ function GetData() {
 							
 							
 							for(let j=0; j<onlyCourseNumArr.length; j++){
+							
 								db.prepare("INSERT INTO Courses(subject, course_number, credits, name, description) VALUES(?,?,?,?,?)")
 								  .bind(
 										[
@@ -180,7 +170,7 @@ function GetData() {
 											onlyCourseNumArr[j],
 											onlyCourseCred[j],
 											onlyCourseName[j],
-											onlyCourseDesc[j]
+											onlyCourseDesc[j].replace(/'/g, "\\'")
 										]
 								    )
 								.run((err)=>{
@@ -195,7 +185,7 @@ function GetData() {
 								
 							}
 							
-							var registered = "registered";
+							var registered = null;
 							var time = "time";
 							for(let k=0; k<crnArr.length; k++){
 								
@@ -662,7 +652,7 @@ function getDescrip(str){
 			if(str[i] === 'c' && str[i+1] === 'o' && str[i+2] === 'u' && str[i+3] === 'r' && str[i+4] === 's' && str[i+5] === 'e' && str[i+6] === 'I' && str[i+7] === 'n' && str[i+8] === 'f' && str[i+9] === 'o' && str[i+10]== '"'){
 				var pos = 12; 
 				var testString = '';
-				while(str[i+pos] !== '<'){
+				while(str[i+pos] !== '<' && str[i+pos+3] !== '>'){
 					//Solved error when loading description data by removing quotations
 					if(str[i+pos] !== '\t' && str[i+pos]!== '\n' /*&& str[i+pos] !== '"' && str[i+pos] !== "'"*/){
 					
