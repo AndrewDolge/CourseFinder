@@ -10,7 +10,8 @@ var sqlite = require('sqlite3').verbose();
 //list of all departments to loop through for data
 var depart = ["ACCT","ACSC","ACST","AERO","AMBA","ARAB","ARHS","ARTH","BCHM","BCOM","BETH","BIOL","BLAW","BUSN","CATH","CHDC","CHEM","CHIN","CIED","CISC","CJUS","CLAS","COAC","COJO","COMM","CPSY","CSIS","CSMA","CTED","DRSW","DSCI","DVDM","DVDT","DVHS","DVLS","DVMT","DVPH","DVPM","DVPT","DVSP","DVSS","DVST","ECMP","ECON","EDCE","EDLD","EDUA","EDUC","EGED","ENGL","ENGR","ENTR","ENVR","ESCI","ETLS","EXSC","FAST","FILM","FINC","FREN","GBEC","GENG","GEOG","GEOL","GERM","GIFT","GMUS","GRED","GREK","GRPE","GRSW","GSPA","HIST","HLTH","HONR","HRDO","IBUS","IDSC","IDSW","IDTH","INAC","INCH","INEC","INEG","INFC","INFR","INGR","INHR","INID","INIM","INJP","INLW","INMC","INMG","INMK","INOP","INPS","INRS","INSP","INST","INTR","IRGA","ITAL","JAPN","JOUR","JPST","LATN","LAWS","LEAD","LGST","LHDT","MATH","MBAC","MBEC","MBEN","MBEX","MBFC","MBFR","MBFS","MBGC","MBGM","MBHC","MBHR","MBIF","MBIM","MBIS","MBLW","MBMG","MBMK","MBNP","MBOP","MBQM","MBSK","MBSP","MBST","MBUN","MBVE","MFGS","MGMP","MGMT","MKTG","MMUS","MSQS","MSRA","MUSC","MUSN","MUSP","MUSR","MUSW","NSCI","ODOC","OPMT","PHED","PHIL","PHYS","PLLD","POLS","PSYC","PUBH","QMCS","READ","REAL","RECE","REDP","RUSS","SABC","SABD","SACS","SAED","SAIM","SAIN","SALS","SAMB","SASE","SASW","SEAM","SEIS","SMEE","SOCI","SOWK","SPAN","SPED","SPGT","SPUG","STAT","STEM","TEGR","THEO","THTR","WMST"];
 
-db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3');
+
+	db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3');
 // delete old copy of db if it exists
 if (fs.existsSync(db_path)){
 	fs.unlinkSync(db_path);
@@ -33,6 +34,10 @@ db.close((err) => {
   }
   console.log('Close the database connection.');
 }); */
+
+
+
+
 
 function MakeTables() {
 	db.serialize(()=>{
@@ -100,17 +105,20 @@ function GetData() {
 						courseNumArr  = getCourseNum(body);
 						courseNameArr = getCourseName(body);
 						buildArr      = getBuild(body);
-						capArr = getCapacity(body);
-						crnArr = getCRN(body);
-						creditArr = getCredits(body);
-						courseDescrip = getDescrip(body);
-						subject = getSubject(body);
-						timeArr = getTime(body);
-						subjectCode = getSubject(body);
+						capArr        = getCapacity(body);
+						crnArr        = getCRN(body);
+						creditArr     = getCredits(body);
+						courseDescrip    = getDescrip(body);
+						subject         = getSubject(body);
+						timeArr         = getTime(body);
+						subjectCode     = getSubject(body);
 						fullSubjectName = getSubjectName(body);
 						
 							//console.log(subjectCode + ": " + fullSubjectName);
 							//console.log(timeArr);
+							console.log("name length: " + courseNameArr.length)
+							console.log("time length: "+ timeArr.length)
+							//console.log(timeArr)
 						
 				
 				
@@ -494,34 +502,41 @@ function getSubject(str){
  * parses the given str for the times of the given class.
  * 
  * @param {string} str 
- * @returns {Array} an array of strings that contain the class times for each class, or an empty string if no matches were found.
+ * @returns {Array} an array of objects that contain the class times for each class. Each object will have fields for every day of week ("M", "T", "W", etc) whose value contains the HTML string from the website or the string "null". If no matches are found in the string, it returns an empty array if no matches were found. 
  */
 function getTime(str){
 	//parse the string with regex
-	var pattern = /(<td class="time">[0-9]+:[0-9]+ (am|pm)<br>[0-9]+:[0-9]+ (am|pm))|(<td class="noTime">(&nbsp))/g;
+	//var pattern = /(<td class="time">[0-9]+:[0-9]+ (am|pm)<br>[0-9]+:[0-9]+ (am|pm))|(<td class="noTime">(&nbsp))/g;
+	//var pattern = new RegExp(/<td class="time">.+<\/td>|(<td class="noTime">(&nbsp))(\/td)/g);
+	var pattern = new RegExp(/<td class="time">.+<\/td>|(<td class="noTime">&nbsp.+)(\/td)/g);
+	
 	var result = str.match(pattern);
 	time = []
 
 	// if there were matches
 	if(Array.isArray(result)){
-		var timePattern = /[0-9]+:[0-9]+ (am|pm)/g;
+		var timePattern = /(?<=\<td class=\"time\"\>)(.*?)(?=\<\/td\>)/g;
 
 		//for every class (i = starting index of each new course)
 		for(let i = 0; i < result.length; i= i + 7){
-			var timestr = "";
+
+			var timeObj = {};
 			//for every day of the week in the course
 			for(let j = i; j < i+7; j++){
-
+				
 				//if there is a time pattern
 				if(timePattern.test(result[j])){
-					//append the string
-					timestr =timestr.concat( getDayNumber(j) + " " +  result[j].match(timePattern)[0] + "-"+result[j].match(timePattern)[1] + ",");	
+					//add it to the object
+					//console.log("timePattern " + result[j].match(timePattern)[0]); 
+					timeObj[getDayNumber(j)] = result[j].match(timePattern)[0];
+					//timestr =timestr.concat( getDayNumber(j) + " " +  result[j].match(timePattern)[0] + "-"+result[j].match(timePattern)[1] + ",");	
+				}else{
+					timeObj[getDayNumber(j)] = "null";
 				}
 
 			}
-			//delete the last comma, and add it to the array.
-			timestr = timestr.substr(0,timestr.length -1);
-			time.push(timestr);	
+			//push the object to the array
+			time.push(timeObj);
 		}
 
 		return time;
