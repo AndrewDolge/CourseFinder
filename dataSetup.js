@@ -77,6 +77,7 @@ function GetData() {
 		/*The received info is one large string, so on receiving info we call various functions to parse the string for the info we need
 		  Each function just finds the correct class the information is labeled under for each course and returns it in an array*/
 		https.get(request, (res) => {
+			console.log("fetched data for department: " + depart[i] + " " +i)
 			//body will contain the large string returned from the St. Thomas site that needs to be parsed 
 			var body = "";
 			
@@ -126,6 +127,8 @@ function GetData() {
 						subjectCode = getSubject(body);
 						fullSubjectName = getSubjectName(body);
 						buildArr = getBuild(body,subjectCode);
+
+						
 						
 						//console.log(subjectCode);
 						
@@ -215,7 +218,7 @@ function GetData() {
 									if(err){
 										console.log(err);
 									}else{
-										console.log("completed insert into section for " + subjectCode + " " + courseSecNum[k] + "-" + sectionNumArr[k]);
+										//console.log("completed insert into section for " + subjectCode + " " + courseSecNum[k] + "-" + sectionNumArr[k]);
 									}
 								});
 							}
@@ -669,6 +672,9 @@ function getDescrip(str){
 					pos++;					
 				}
 				testString = testString.trim();
+				
+				testString = testString.replace(/"/g, '\\"');
+				testString = testString.replace(/'/g, "\\'");
 			
 				descripArr.push(testString);
 				
