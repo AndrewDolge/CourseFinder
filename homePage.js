@@ -5,7 +5,7 @@ var url = require('url');
 
 var path = require('path');
 var express = require('express'); 
-//var sqlite3 = require('sqlite3');
+var sqlite3 = require('sqlite3');
 
 var app = express(); 
 var port = 8014;
@@ -13,14 +13,14 @@ var port = 8014;
 var public_dir = path.join(__dirname, 'public'); //can only access what you put in public dir
 var mime = require('mime-types');
 
-/*var ust_db = new sqlite3.Database(path.join(__dirname, 'db', 'ust_courses.sqlite3'), (err) => {
+var ust_db = new sqlite3.Database(path.join(__dirname, 'db', 'ust_courses.sqlite3'), (err) => {
 	if (err) {
 		console.log('Error UST database'); 
 	}
 	else {
 		console.log('Now connected to UST database!');
 	}
-});*/
+})
 
 //When a get request occurs to home page displays all homepage info
 app.get('/home', (req, res) => {
