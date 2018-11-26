@@ -178,10 +178,11 @@ function GetData() {
 							}
 							var k;
 							var registered = "registered";
-							var time = "time";
+							
 							for(k=0; k<crnArr.length; k++){
-								
-								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (\""+crnArr[k]+"\",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+timeArr[k]+"\",\""+capArr[k]+"\",\""+registered+"\");", (err)=>{
+								statement = "INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES ("+crnArr[k]+",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+timeArr[k]+"\","+capArr[k]+",\""+registered+"\");"
+								//console.log(statement);
+								db.run(statement, (err)=>{
 									//console.log(err);
 									//console.log(subjectCode +": "+courseNameArr[j]);
 								});
@@ -627,8 +628,8 @@ function getDescrip(str){
 				var pos = 12; 
 				var testString = '';
 				while(str[i+pos] !== '<' && str[i+pos+3] !== '>'){
-					//Solved error when loading description data by removing quotations
-					if(str[i+pos] !== '\t' && str[i+pos]!== '\n'){ //&& str[i+pos] !== '"' && str[i+pos] !== "'"){
+			
+					if(str[i+pos] !== '\t' && str[i+pos]!== '\n'&& str[i+pos] !== '"' && str[i+pos] !== "'"){
 					
 						testString += str[i+pos];
 						
@@ -637,8 +638,7 @@ function getDescrip(str){
 				}
 				testString = testString.trim();
 				
-				//testString = testString.replace(/"/g, '\\"');
-				//testString = testString.replace(/'/g, "\\'");
+				
 			
 				descripArr.push(testString);
 				
