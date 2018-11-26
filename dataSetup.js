@@ -164,10 +164,13 @@ function GetData() {
 							});
 							
 							var j;
+							var statement;
 							for(j=0; j<onlyCourseNumArr.length; j++){
-								db.run("INSERT INTO Courses(subject, course_number, credits, name, description) VALUES (\""+subjectCode+"\",\""+onlyCourseNumArr[j]+"\",\""+onlyCourseCred[j]+"\",\""+onlyCourseName[j]+"\",\""+onlyCourseDesc[j]+"\");", (err)=>{
+								statement = "INSERT INTO Courses(subject, course_number, credits, name, description) VALUES (\""+subjectCode+"\",\""+onlyCourseNumArr[j]+"\","+onlyCourseCred[j]+",\""+onlyCourseName[j]+"\",\""+onlyCourseDesc[j]+"\");";
+								console.log(statement);
+								db.run(statement, (err)=>{
 								//console.log(err);
-								console.log(err +": "+subjectCode);
+								//console.log(err +": "+subjectCode);
 								
 
 								});
@@ -623,7 +626,7 @@ function getDescrip(str){
 			if(str[i] === 'c' && str[i+1] === 'o' && str[i+2] === 'u' && str[i+3] === 'r' && str[i+4] === 's' && str[i+5] === 'e' && str[i+6] === 'I' && str[i+7] === 'n' && str[i+8] === 'f' && str[i+9] === 'o' && str[i+10]== '"'){
 				var pos = 12; 
 				var testString = '';
-				while(str[i+pos] !== '<'){
+				while(str[i+pos] !== '<' && str[i+pos+3] !== '>'){
 					//Solved error when loading description data by removing quotations
 					if(str[i+pos] !== '\t' && str[i+pos]!== '\n'){ //&& str[i+pos] !== '"' && str[i+pos] !== "'"){
 					
@@ -634,8 +637,8 @@ function getDescrip(str){
 				}
 				testString = testString.trim();
 				
-				testString = testString.replace(/"/g, '\\"');
-				testString = testString.replace(/'/g, "\\'");
+				//testString = testString.replace(/"/g, '\\"');
+				//testString = testString.replace(/'/g, "\\'");
 			
 				descripArr.push(testString);
 				
