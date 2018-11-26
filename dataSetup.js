@@ -673,8 +673,7 @@ function getDescrip(str){
 				}
 				testString = testString.trim();
 				
-				testString = testString.replace(/"/g, '\\"');
-				testString = testString.replace(/'/g, "\\'");
+				
 			
 				descripArr.push(testString);
 				
