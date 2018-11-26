@@ -58,11 +58,10 @@ function createIndex(){
 }
 
 function GetData() {
-	var i;
 
 	//setUpTables();
 	//for loop to go through each department 
-	for(i= 0; i < depart.length; i++){
+	for(let i= 0; i < depart.length; i++){
 		var year = 2019;
 		var term = 20;
 
@@ -139,7 +138,7 @@ function GetData() {
 				
 				
 						//to split out section and course number from courseNumArr
-						for(x= 0; x < courseNumArr.length; x++){
+						for(let x= 0; x < courseNumArr.length; x++){
 								 var courseNum = courseNumArr[x];
 								 var split = courseNum.split("-");
 								 var unique = split[0];
@@ -159,28 +158,65 @@ function GetData() {
 						//            Insert statements          //
 						db.serialize(()=>{
 							
-							db.run("INSERT INTO Departments(subject, full_name) VALUES (\""+subjectCode+"\",\""+fullSubjectName+"\");", (err)=>{
-								//console.log(err);	
+							db.prepare("INSERT INTO Departments(subject, full_name) VALUES (?, ?);")
+							  .bind([subjectCode, fullSubjectName])
+							  .run((err)=>{
+									if(err){
+										console.log(err);
+									}else{
+										console.log("completed insert into department for " + fullSubjectName);
+									}	
 							});
 							
-							var j;
-							for(j=0; j<onlyCourseNumArr.length; j++){
-								db.run("INSERT INTO Courses(subject, course_number, credits, name, description) VALUES (\""+subjectCode+"\",\""+onlyCourseNumArr[j]+"\",\""+onlyCourseCred[j]+"\",\""+onlyCourseName[j]+"\",\""+onlyCourseDesc[j]+"\");", (err)=>{
-								//console.log(err);
-								//console.log(err +": "+subjectCode);
-								
-
+							
+							for(let j=0; j<onlyCourseNumArr.length; j++){
+								db.prepare("INSERT INTO Courses(subject, course_number, credits, name, description) VALUES(?,?,?,?,?)")
+								  .bind(
+										[
+											subjectCode,
+											onlyCourseNumArr[j],
+											onlyCourseCred[j],
+											onlyCourseName[j],
+											onlyCourseDesc[j]
+										]
+								    )
+								.run((err)=>{
+									if(err){
+										console.log(err);
+										
+									}else{
+										console.log("completed insert into course for "+ subjectCode + " " + onlyCourseNumArr[j]);
+									}
+									
 								});
 								
 							}
-							var k;
+							
 							var registered = "registered";
 							var time = "time";
-							for(k=0; k<crnArr.length; k++){
+							for(let k=0; k<crnArr.length; k++){
 								
-								db.run("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (\""+crnArr[k]+"\",\""+subjectCode+"\",\""+courseSecNum[k]+"\",\""+sectionNumArr[k]+"\",\""+buildArr[k].build+"\",\""+buildArr[k].room+"\",\""+profArr[k]+"\",\""+timeArr[k]+"\",\""+capArr[k]+"\",\""+registered+"\");", (err)=>{
-									console.log(err);
-									console.log(subjectCode +": "+courseNameArr[j]);
+								db.prepare("INSERT INTO Sections(crn, subject, course_number, section_number, building, room, professors, times, capacity, registered) VALUES (?,?,?,?,?,?,?,?,?,?);")
+								.bind(  
+										[
+											crnArr[k],
+											subjectCode,
+											courseSecNum[k],
+											sectionNumArr[k],
+											buildArr[k].build,
+											buildArr[k].room,
+											profArr[k],
+											JSON.stringify(timeArr[k]),
+											capArr[k],
+											registered
+										]
+									)
+								.run( (err)=>{
+									if(err){
+										console.log(err);
+									}else{
+										console.log("completed insert into section for " + subjectCode + " " + courseSecNum[k] + "-" + sectionNumArr[k]);
+									}
 								});
 							}
 						});
@@ -625,7 +661,7 @@ function getDescrip(str){
 				var testString = '';
 				while(str[i+pos] !== '<'){
 					//Solved error when loading description data by removing quotations
-					if(str[i+pos] !== '\t' && str[i+pos]!== '\n' && str[i+pos] !== '"' && str[i+pos] !== "'"){
+					if(str[i+pos] !== '\t' && str[i+pos]!== '\n' /*&& str[i+pos] !== '"' && str[i+pos] !== "'"*/){
 					
 						testString += str[i+pos];
 						
@@ -697,9 +733,8 @@ function getTime(str){
 					//add it to the object
 					//console.log("timePattern " + result[j].match(timePattern)[0]); 
 					timeObj[getDayNumber(j)] = result[j].match(timePattern)[0];
-					//timestr =timestr.concat( getDayNumber(j) + " " +  result[j].match(timePattern)[0] + "-"+result[j].match(timePattern)[1] + ",");	
 				}else{
-					timeObj[getDayNumber(j)] = "null";
+					timeObj[getDayNumber(j)] = null;
 				}
 
 			}
