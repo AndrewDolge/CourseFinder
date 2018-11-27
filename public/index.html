@@ -2,21 +2,48 @@
 <html>
 	<head>
 		<title> Home Page </title>
+		<script type="text/javascript" src="homePage.js"></script>
+
+		<link rel="stylesheet" href="style.css">
 		<script type="text/javascript" src="practiceHomePage.js"></script>
 	</head>
 
-	<body>
+	<body onload="start()">
+		<a class="st-thomas-logo" href="http://www.stthomas.edu/">
+    			University of St. Thomas – Minnesota – A private, Catholic liberal arts university
+    	</a>
+		<a href="about.html">About Us</a>
 		<h1> UST Course Login: </h1>
 		<form method= "POST" enctype= "multipart/form-data" > 
-		Login:	<input type= "text" name="login" /> <br/>
-		Password: <input type="text" name="password" /> <br/>
-		<input formaction = "/new" type= "submit" value ="Create New User" />
-		<input formaction = "/login" type= "submit" value ="Login"/>
-		
+			<select name="position">
+			  <option value="student">Student</option>
+			  <option value="faculty">Faculty</option>
+			</select>
+			</br>
+			<input type= "text" placeholder="Login" name="login" /> <br/>
+			<input type="text" placeholder="Password" name="passwd" /> <br/>
+			<input id="createNew" type= "button" value ="Create New User" onclick="create()"/>
+			<input id="first" type="text" placeholder="First Name" name = "firstName"/>
+			<input id="last" type="text" placeholder="Last Name" name= "lastName"/>
+			<input id="sub" formaction = "/new" type= "submit" value ="Submit New User"/>
+			<input id="log" formaction = "/login" type= "submit" value ="Login"/>
 		</form>
-	
+		<script>
+			function start(){
+				document.getElementById("first").style.display = "none";
+				document.getElementById("last").style.display = "none";
+				document.getElementById("sub").style.display = "none";
+			}
+			function create(){
+				document.getElementById("createNew").style.display = "none";
+				document.getElementById("log").style.display = "none";
+				document.getElementById("first").style.display = "block";
+				document.getElementById("last").style.display = "block";
+				document.getElementById("sub").style.display = "block";
+			}
+		</script>
 	</body>
-
+	
 
 
 </html>
