@@ -112,16 +112,20 @@ app.post('/new', (req, res) => {
 	var pass = '';
 	var hash = '';
 	var position = '';
+	var first = '';
+	var last = '';
 	var form = new multiparty.Form();
     form.parse(req, (err, fields, files) => {
 		
 		login = fields.login;
 		pass = fields.passwd;
 		position = fields.position;
+		first = fields.firstName;
+		last = fields.lastName;
 	
 		console.log(pass);
-		if(login == '' || pass == '' || isNaN(login)===true){
-			errorLog(res,"Please enter a login and password");
+		if(login == '' || pass == '' || isNaN(login)===true || first == '' || last == ''){
+			errorLog(res,"Please enter enter all fields");
 		}
 		else{
 			ust_db.all("Select * From People where university_id == ?",login, (err, rows) => {
@@ -133,7 +137,7 @@ app.post('/new', (req, res) => {
 						//having trouble inserting multiple things at once, need to remember the escape 
 						hash = md5(pass);
 						//ust_db.run("INSERT INTO People(password) VALUES(?)", hash);
-						ust_db.run("INSERT INTO People(university_id, position, password) VALUES("+login+",\""+position+"\",\""+hash+"\")");
+						ust_db.run("INSERT INTO People(university_id, position, password, first_name, last_name) VALUES("+login+",\""+position+"\",\""+hash+"\",\""+first+"\",\""+last+"\")");
 						//Call to our search page
 						fs.readFile(path.join(public_dir, 'search.html'), (err, data) => { 
 							if(err){

@@ -8,7 +8,7 @@
 		<script type="text/javascript" src="practiceHomePage.js"></script>
 	</head>
 
-	<body>
+	<body onload="start()">
 		<a class="st-thomas-logo" href="http://www.stthomas.edu/">
     			University of St. Thomas – Minnesota – A private, Catholic liberal arts university
     	</a>
@@ -20,21 +20,29 @@
 			  <option value="faculty">Faculty</option>
 			</select>
 			</br>
-			Login:	<input type= "text" name="login" /> <br/>
-			Password: <input type="text" name="passwd" /> <br/>
-			<input type= "submit" value ="Create New User" onclick="create()"/>
+			<input type= "text" placeholder="Login" name="login" /> <br/>
+			<input type="text" placeholder="Password" name="passwd" /> <br/>
+			<input id="createNew" type= "button" value ="Create New User" onclick="create()"/>
+			<input id="first" type="text" placeholder="First Name" name = "firstName"/>
+			<input id="last" type="text" placeholder="Last Name" name= "lastName"/>
+			<input id="sub" formaction = "/new" type= "submit" value ="Submit New User"/>
 			<input formaction = "/login" type= "submit" value ="Login"/>
-			<input style="display='none';" type="text" value="First Name" name = "firstName"/>
-			<input style="display='none';" type="text" value="Last Name" name= "lastName"/>
-			<input style="display='none';" formaction = "/new" type= "submit" value ="Submit New User"/>
 		</form>
-		
+		<script>
+			function start(){
+				document.getElementById("first").style.display = "none";
+				document.getElementById("last").style.display = "none";
+				document.getElementById("sub").style.display = "none";
+			}
+			function create(){
+				document.getElementById("createNew").style.display = "none";
+				document.getElementById("first").style.display = "block";
+				document.getElementById("last").style.display = "block";
+				document.getElementById("sub").style.display = "block";
+			}
+		</script>
 	</body>
-	<script>
-		function create(){
-			
-		}
-	</script>
+	
 
 
 </html>
