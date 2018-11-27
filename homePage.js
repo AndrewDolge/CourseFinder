@@ -1,22 +1,17 @@
-
-
 var fs = require('fs');
 var http = require('http');
 var url = require('url'); 
-
 var path = require('path');
 var express = require('express'); 
 var sqlite3 = require('sqlite3');
 var multiparty = require('multiparty');
-var md5 = require('md5');
-
 var app = express(); 
-var port = 8014;
-
-var public_dir = path.join(__dirname, 'public'); 
 var mime = require('mime-types');
 
-//connection to our database
+var port = 8014;
+var public_dir = path.join(__dirname, 'public'); 
+
+//Connection to our database
 var ust_db = new sqlite3.Database(path.join(__dirname, 'db', 'ust_courses.sqlite3'), (err) => {
 	if (err) {
 		console.log('Error UST database'); 
@@ -26,40 +21,45 @@ var ust_db = new sqlite3.Database(path.join(__dirname, 'db', 'ust_courses.sqlite
 	}
 });
 
+
+//Any static files that do not come to home (javascript, css) will look to see if file exists 
+app.use(express.static(public_dir));
+
 //When a get request occurs to home page displays all homepage info
 app.get('/home', (req, res) => {
 	
     	fs.readFile(path.join(public_dir, 'index.html'), (err, data) => { 
 			if(err){
 				res.writeHead(404, {'Content-Type': 'text/plain'});
-				res.write('Oh no! Could\'t find that page!'); //that backslash is used to signal that you specifically want the ' without ending the string
+				res.write('Oh no! Could\'t find that page!'); 
 				res.end();
-			} //when accessing url if there is an error in the filename then return this text 
+			} 
 			
 			else{
-				var mime_type= mime.lookup('index.html') || 'text/plain'; //if cant find mime type of file then content type is text/plain, mime.lookup will give valid mime type of file or  return false
-				res.writeHead(200, {'Content-Type': mime_type}); //for each file make the content type the mime type in order to properly display 
-				res.write(data); //write the content received in data
+				var mime_type= mime.lookup('index.html') || 'text/plain'; 
+				res.writeHead(200, {'Content-Type': mime_type}); 
+				res.write(data); 
 				res.end();
 			} 
 		}); 
    
 });
 
-//When retuning user logs in
+//In index when user clicks login will send here
 app.post('/login' , (req, res) => {
 	var login = 0;
 	var pass = '';
-	var checkHash = '';
+	
 	var form = new multiparty.Form();
     form.parse(req, (err, fields, files) => {
 		//console.log(fields);
 		login = fields.login;
 		pass = fields.passwd;
-	
-		//if(login != '' && pass != ''){
+		
+		
+		//If login is empty or not a number 
 		if(login == '' || pass == ''|| isNaN(login)===true){
-			errorLog(res,"Please enter a login and password");
+			errorLog(res,"Please enter a valid login and password");
 		}
 		else{
 			ust_db.all("Select * From People where university_id == ?",login, (err, rows) => {
@@ -73,24 +73,14 @@ app.post('/login' , (req, res) => {
 					}
 					//If user tries to login and user name exists
 					else{
-						checkHash = md5(pass);
-						if(checkHash === rows[0].password){
-							fs.readFile(path.join(public_dir, 'search.html'), (err, data) => { 
-								if(err){
-									res.writeHead(404, {'Content-Type': 'text/plain'});
-									res.write('Oh no! Could\'t find that page!'); 
-									res.end();
-								} //when accessing url if there is an error in the filename then return this text 
-								
-								else{
-									var mime_type= mime.lookup('search.html') || 'text/plain'; 
-									res.writeHead(200, {'Content-Type': mime_type}); //for each file make the content type the mime type in order to properly display 
-									res.write(data); //write the content received in data
-									res.end();
-								} 
-							}); //fs.readFile
-						} //if
 						
+						if(pass == rows[0].password){
+							//Call to our search page if login and password match 
+							callSearch(res);
+							
+						} 
+						
+						//If password and login do not match return to login page and add banner  
 						else{
 							errorLog(res,"Login and password do not match!");
 						}
@@ -105,27 +95,28 @@ app.post('/login' , (req, res) => {
 
 }); //app.post(/login)
 
-//When user tries to create new account 
+//When user creates a new user through the submit new user button
 app.post('/new', (req, res) => {
 	
-	var login = 0;
+	var login = '';
 	var pass = '';
-	var hash = '';
 	var position = '';
 	var first = '';
 	var last = '';
+	
 	var form = new multiparty.Form();
     form.parse(req, (err, fields, files) => {
+		//console.log(fields);
 		
 		login = fields.login;
 		pass = fields.passwd;
 		position = fields.position;
 		first = fields.firstName;
 		last = fields.lastName;
-	
-		console.log(pass);
+		
+		//If any fields are empty or login is not a number 
 		if(login == '' || pass == '' || isNaN(login)===true || first == '' || last == ''){
-			errorLog(res,"Please enter enter all fields");
+			errorLog(res,"Please enter enter valid values in all fields");
 		}
 		else{
 			ust_db.all("Select * From People where university_id == ?",login, (err, rows) => {
@@ -134,30 +125,15 @@ app.post('/new', (req, res) => {
 				}
 				else {	
 					if(rows.length === 0){
-						//having trouble inserting multiple things at once, need to remember the escape 
-						hash = md5(pass);
-						//ust_db.run("INSERT INTO People(password) VALUES(?)", hash);
-						ust_db.run("INSERT INTO People(university_id, position, password, first_name, last_name) VALUES("+login+",\""+position+"\",\""+hash+"\",\""+first+"\",\""+last+"\")");
-						//Call to our search page
-						fs.readFile(path.join(public_dir, 'search.html'), (err, data) => { 
-							if(err){
-								res.writeHead(404, {'Content-Type': 'text/plain'});
-								res.write('Oh no! Could\'t find that page!'); //that backslash is used to signal that you specifically want the ' without ending the string
-								res.end();
-							} //when accessing url if there is an error in the filename then return this text 
-							
-							else{
-								var mime_type= mime.lookup('search.html') || 'text/plain'; //if cant find mime type of file then content type is text/plain, mime.lookup will give valid mime type of file or  return false
-								res.writeHead(200, {'Content-Type': mime_type}); //for each file make the content type the mime type in order to properly display 
-								res.write(data); //write the content received in data
-								res.end();
-							} 
-						});
-						//after insert here do a read file to our search page
+						//If no user previously exists insert data and send user to our search page
+						ust_db.run("INSERT INTO People(university_id, position, password, first_name, last_name) VALUES("+login+",\""+position+"\",\""+pass+"\",\""+first+"\",\""+last+"\")");
+						
+						callSearch(res);
+						
 					}
 					else{
-						errorLog(res,"Cannot create user with existing login!");
-						//if user tries to create a new user that already exists returns to home page with adding a warning banner 
+						//If user already exists send back to login page and notify with banner 
+						errorLog(res,"Cannot create user with existing login!"); 
 						
 					}//else
 				}//else
@@ -178,7 +154,7 @@ app.listen(port, () => {
 });
  
 
-
+//Function is used to send users back to login page with error banner when a login error occurs
 function errorLog(res,reason){
 	fs.readFile(path.join(public_dir, 'index.html'), (err, data) => { 
 		if(err){
@@ -189,15 +165,36 @@ function errorLog(res,reason){
 		
 		else{
 			var mime_type= mime.lookup('index.html') || 'text/html'; 
-			res.writeHead(200, {'Content-Type': mime_type}); 
-			//Warning banner 
+			res.writeHead(200, {'Content-Type': mime_type});
+			
+			//Banner that displays to the user what is incorrect with their login 
 			res.write('<h3 style= "color: white; background-color: orange; text-align: center;">'+reason+'</h3>');
-			res.write(data); //write the content received in data
+			res.write(data); 
 			res.end();
 		} 
 	}); //fs.readFile 
 	
 
+}
+
+//Function is used to send users to our search page on successful login
+function callSearch(res){
+	
+	fs.readFile(path.join(public_dir, 'search.html'), (err, data) => { 
+		if(err){
+			res.writeHead(404, {'Content-Type': 'text/plain'});
+			res.write('Oh no! Could\'t find that page!'); 
+			res.end();
+		} 
+		
+		else{
+			var mime_type= mime.lookup('search.html') || 'text/plain'; 
+			res.writeHead(200, {'Content-Type': mime_type}); 
+			res.write(data); 
+			res.end();
+		} 
+	});
+	
 }
 
 
