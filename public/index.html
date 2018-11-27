@@ -2,21 +2,22 @@
 <html>
 	<head>
 		<title> Home Page </title>
-		<script type="text/javascript" src="practiceHomePage.js"></script>
+		<script type="text/javascript" src="homePage.js"></script>
 	</head>
 
 	<body>
 		<h1> UST Course Login: </h1>
-		<form action= "/home" method= "POST" enctype= "multipart/form-data" > <!-- enc type allows us to handle some parts text with other non text parts -->
+		<form action= "/login" method= "POST" enctype= "multipart/form-data" > 
 		Login:	<input type= "text" name="login" /> <br/>
 		Password: <input type="text" name="password" /> <br/>
 		<input type= "submit" value ="Create New User" />
-		<!--Do we do a form request when button is pushed or just in JS do app.post(/index) and post it to server? But then how do we switch pages?
+		<input type= "submit" value ="Login"/>
+		
 		
 		<!--Image: <input type="file" name="img_file" /> <br/>  Named image but works for any type of file (we did example with plain text file) -->
 		<!--Image2: <input type="file" name="img_file" /> <br/>  Can have two in here and will add to img file object -->
 			<!--<input type= "submit" value ="Submit" />-->
-		<!--</form>-->
+		</form>
 	
 	</body>
 
