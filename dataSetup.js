@@ -3,14 +3,20 @@ var fs     = require('fs');
 var path   = require('path');
 var https  = require('https');
 var url    = require('url'); 
-
 var sqlite = require('sqlite3').verbose();
 
 //list of all departments to loop through for data
 var depart = ["ACCT","ACSC","ACST","AERO","AMBA","ARAB","ARHS","ARTH","BCHM","BCOM","BETH","BIOL","BLAW","BUSN","CATH","CHDC","CHEM","CHIN","CIED","CISC","CJUS","CLAS","COAC","COJO","COMM","CPSY","CSIS","CSMA","CTED","DRSW","DSCI","DVDM","DVDT","DVHS","DVLS","DVMT","DVPH","DVPM","DVPT","DVSP","DVSS","DVST","ECMP","ECON","EDCE","EDLD","EDUA","EDUC","EGED","ENGL","ENGR","ENTR","ENVR","ESCI","ETLS","EXSC","FAST","FILM","FINC","FREN","GBEC","GENG","GEOG","GEOL","GERM","GIFT","GMUS","GRED","GREK","GRPE","GRSW","GSPA","HIST","HLTH","HONR","HRDO","IBUS","IDSC","IDSW","IDTH","INAC","INCH","INEC","INEG","INFC","INFR","INGR","INHR","INID","INIM","INJP","INLW","INMC","INMG","INMK","INOP","INPS","INRS","INSP","INST","INTR","IRGA","ITAL","JAPN","JOUR","JPST","LATN","LAWS","LEAD","LGST","LHDT","MATH","MBAC","MBEC","MBEN","MBEX","MBFC","MBFR","MBFS","MBGC","MBGM","MBHC","MBHR","MBIF","MBIM","MBIS","MBLW","MBMG","MBMK","MBNP","MBOP","MBQM","MBSK","MBSP","MBST","MBUN","MBVE","MFGS","MGMP","MGMT","MKTG","MMUS","MSQS","MSRA","MUSC","MUSN","MUSP","MUSR","MUSW","NSCI","ODOC","OPMT","PHED","PHIL","PHYS","PLLD","POLS","PSYC","PUBH","QMCS","READ","REAL","RECE","REDP","RUSS","SABC","SABD","SACS","SAED","SAIM","SAIN","SALS","SAMB","SASE","SASW","SEAM","SEIS","SMEE","SOCI","SOWK","SPAN","SPED","SPGT","SPUG","STAT","STEM","TEGR","THEO","THTR","WMST"];
+var term = Object.freeze(	
+								{
+									"J-Term": 10,
+									"Spring": 20,
+									"Summer": 30,
+									"Fall"  : 40
+								}
+	)
 
-
-	db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3');
+db_path = path.join(__dirname, 'db', 'ust_courses.sqlite3');
 // delete old copy of db if it exists
 if (fs.existsSync(db_path)){
 	fs.unlinkSync(db_path);
@@ -23,7 +29,7 @@ let db = new sqlite.Database(db_path, (err) => {
 	else {
 		console.log('Connected to the course_data database.');
 		MakeTables();
-		GetData();
+		GetData(term.Spring, 2019);
 		createIndex();
 		
 	}
@@ -32,23 +38,22 @@ let db = new sqlite.Database(db_path, (err) => {
 
 
 
-
+/**
+ * Creates the tables for the database.
+ */
 function MakeTables() {
 	db.serialize(()=>{
 		db.run("CREATE TABLE Departments(subject TEXT PRIMARY KEY, full_name TEXT)");
 		db.run("CREATE TABLE Courses(subject TEXT, course_number TEXT, credits INTEGER, name TEXT, description TEXT)");
 		db.run("CREATE TABLE Sections(crn INTEGER PRIMARY KEY, subject TEXT, course_number TEXT, section_number TEXT, building TEXT, room TEXT, professors TEXT, times TEXT, capacity INTEGER, registered TEXT)");
 		db.run("CREATE TABLE People(university_id INTEGER PRIMARY KEY, position TEXT, password TEXT, first_name TEXT, last_name TEXT, registered_courses TEXT)");
-		/*db.run("INSERT INTO Departments(subject,full_name) VALUES ('CISC','Computer and Info Sci')");
-		db.run("INSERT INTO Departments(subject,full_name) VALUES ('STAT','Statistics')");
-		db.all("SELECT * FROM Departments",(err,rows)=>{
-			console.log(rows);
-		});*/
 	});
 }
 
+/**
+ * Indexes created for common SQL searches, each table can have multiple indexes
+ */
 function createIndex(){
-	//Indexes created for common SQL searches, each table can have multiple indexes
 	db.serialize(()=>{
 		db.run("CREATE INDEX first_index ON Courses(name)");
 		db.run("CREATE INDEX second_index ON Sections(crn)");
@@ -56,14 +61,15 @@ function createIndex(){
 		db.run("CREATE UNIQUE INDEX fourth_index ON Departments(subject)");
 	})
 }
+/**
+ * Retrieves data from the website, creates the tables, and populates the database with the website data.
+ */
+function GetData(term, year) {
 
-function GetData() {
-
-	//setUpTables();
 	//for loop to go through each department 
 	for(let i= 0; i < depart.length; i++){
-		var year = 2019;
-		var term = 20;
+		//var year = 2019;
+		//var term = 20;
 
 		//request to St. Thomas URL
 		var request =  {
@@ -81,27 +87,25 @@ function GetData() {
 			//body will contain the large string returned from the St. Thomas site that needs to be parsed 
 			var body = "";
 			
-			var sectionNumArr = []; //Contains only section numbers
-			
-			var courseNumArr = []; //Contains both course and section numbers, DO NOT need to add to database
-			
-			var profArr = []; //Contains Professor Names
-			var courseNameArr = []; //Containes Course Names
-			var buildArr= []; //Contains an array of objects with building and room number keys
-			var capArr =[]; //Contains capacity of classes
-			var crnArr = []; //Contains CRN of classes
-			var creditArr = []; //Contains credits of classes
-			var courseDescrip = []; //Contains decription of classes
-			var timeArr = []; //Contains day/time of classes
-			var subjectCode = ""; //Contains four letter subject code for the loaded page, will need to add to each line item
+			var sectionNumArr   = []; //Contains only section numbers
+			var courseNumArr    = []; //Contains both course and section numbers, DO NOT need to add to database
+			var profArr         = []; //Contains Professor Names
+			var courseNameArr   = []; //Containes Course Names
+			var buildArr        = []; //Contains an array of objects with building and room number keys
+			var capArr          = []; //Contains capacity of classes
+			var crnArr          = []; //Contains CRN of classes
+			var creditArr       = []; //Contains credits of classes
+			var courseDescrip   = []; //Contains decription of classes
+			var timeArr         = []; //Contains day/time of classes
+			var subjectCode     = ""; //Contains four letter subject code for the loaded page, will need to add to each line item
 			var fullSubjectName = ""; //Contains the full name of the loaded department page, will need to add to each line item
-			var courseSecNum = []; //contains one course number for every individual course offered in a given semester, regardless of number of sections
+			var courseSecNum    = []; //contains one course number for every individual course offered in a given semester, regardless of number of sections
 			
 			///special vars for course array
 			var onlyCourseNumArr = []; //Contains only course numbers
-			var onlyCourseDesc = [];
-			var onlyCourseCred = [];
-			var onlyCourseName = [];
+			var onlyCourseDesc   = [];
+			var onlyCourseCred   = [];
+			var onlyCourseName   = [];
 			
 		
 			res.on("data", (chunk) =>{
@@ -114,19 +118,17 @@ function GetData() {
 						//Once receive data call each function
 						var i; 
 						profArr= getProf(body);
-						courseNumArr  = getCourseNum(body);
-						courseNameArr = getCourseName(body);
-						
-						buildArr      = getBuild(body);
-						capArr        = getCapacity(body);
-						crnArr        = getCRN(body);
-						creditArr     = getCredits(body);
-						courseDescrip = getDescrip(body);
-
-						timeArr = getTime(body);
-						subjectCode = getSubject(body);
+						courseNumArr    = getCourseNum  (body);
+						courseNameArr   = getCourseName (body);
+						buildArr        = getBuild      (body);
+						capArr          = getCapacity   (body);
+						crnArr          = getCRN        (body);
+						creditArr       = getCredits    (body);
+						courseDescrip   = getDescrip    (body);
+						timeArr         = getTime       (body);
+						subjectCode     = getSubject    (body);
 						fullSubjectName = getSubjectName(body);
-						buildArr = getBuild(body,subjectCode);
+						buildArr        = getBuild      (body,subjectCode);
 
 				
 						//to split out section and course number from courseNumArr
@@ -148,6 +150,8 @@ function GetData() {
 			
 						///////////////////////////////////////////
 						//            Insert statements          //
+
+						//Insert statements for departments
 						db.serialize(()=>{
 							
 							db.prepare("INSERT INTO Departments(subject, full_name) VALUES (?,?);")
@@ -160,7 +164,7 @@ function GetData() {
 									}	
 							});
 							
-							
+							//Insert statements for courses
 							for(let j=0; j<onlyCourseNumArr.length; j++){
 							
 								db.prepare("INSERT INTO Courses(subject, course_number, credits, name, description) VALUES(?,?,?,?,?)")
@@ -185,6 +189,7 @@ function GetData() {
 								
 							}
 							
+							//insert statements for Sections
 							var registered = null;
 							var time = "time";
 							for(let k=0; k<crnArr.length; k++){
@@ -695,7 +700,6 @@ function getSubject(str){
 	}
 	return subjectString;
 }
-
 
 /**
  * parses the given str for the times of the given class.
