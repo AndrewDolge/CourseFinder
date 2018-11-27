@@ -50,7 +50,7 @@ app.get('/home', (req, res) => {
 app.post('/login' , (req, res) => {
 	var login = 0;
 	var pass = '';
-	var hash = '';
+	var checkHash = '';
 	var form = new multiparty.Form();
     form.parse(req, (err, fields, files) => {
 		//console.log(fields);
@@ -73,23 +73,28 @@ app.post('/login' , (req, res) => {
 					}
 					//If user tries to login and user name exists
 					else{
-						checlHash = md5(pass);
-						if( checkHash !== rows[0].password){
+						checkHash = md5(pass);
+						if(checkHash === rows[0].password){
 							fs.readFile(path.join(public_dir, 'search.html'), (err, data) => { 
 								if(err){
 									res.writeHead(404, {'Content-Type': 'text/plain'});
-									res.write('Oh no! Could\'t find that page!'); //that backslash is used to signal that you specifically want the ' without ending the string
+									res.write('Oh no! Could\'t find that page!'); 
 									res.end();
 								} //when accessing url if there is an error in the filename then return this text 
 								
 								else{
-									var mime_type= mime.lookup('search.html') || 'text/plain'; //if cant find mime type of file then content type is text/plain, mime.lookup will give valid mime type of file or  return false
+									var mime_type= mime.lookup('search.html') || 'text/plain'; 
 									res.writeHead(200, {'Content-Type': mime_type}); //for each file make the content type the mime type in order to properly display 
 									res.write(data); //write the content received in data
 									res.end();
 								} 
-							});
+							}); //fs.readFile
+						} //if
+						
+						else{
+							errorLog(res,"Login and password do not match!");
 						}
+							
 					}//else
 				}//else
 			}); //ust_db.all
@@ -129,6 +134,7 @@ app.post('/new', (req, res) => {
 						hash = md5(pass);
 						//ust_db.run("INSERT INTO People(password) VALUES(?)", hash);
 						ust_db.run("INSERT INTO People(university_id, position, password) VALUES("+login+",\""+position+"\",\""+hash+"\")");
+						//Call to our search page
 						fs.readFile(path.join(public_dir, 'search.html'), (err, data) => { 
 							if(err){
 								res.writeHead(404, {'Content-Type': 'text/plain'});
