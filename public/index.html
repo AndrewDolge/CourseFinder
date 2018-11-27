@@ -26,7 +26,7 @@
 			<input id="first" type="text" placeholder="First Name" name = "firstName"/>
 			<input id="last" type="text" placeholder="Last Name" name= "lastName"/>
 			<input id="sub" formaction = "/new" type= "submit" value ="Submit New User"/>
-			<input formaction = "/login" type= "submit" value ="Login"/>
+			<input id="log" formaction = "/login" type= "submit" value ="Login"/>
 		</form>
 		<script>
 			function start(){
@@ -36,6 +36,7 @@
 			}
 			function create(){
 				document.getElementById("createNew").style.display = "none";
+				document.getElementById("log").style.display = "none";
 				document.getElementById("first").style.display = "block";
 				document.getElementById("last").style.display = "block";
 				document.getElementById("sub").style.display = "block";
