@@ -103,6 +103,7 @@ app.post('/new', (req, res) => {
 	var position = '';
 	var first = '';
 	var last = '';
+	var isFloat = false
 	
 	var form = new multiparty.Form();
     form.parse(req, (err, fields, files) => {
@@ -113,9 +114,11 @@ app.post('/new', (req, res) => {
 		position = fields.position;
 		first = fields.firstName;
 		last = fields.lastName;
+		//If user enters floating point as login returns true
+		isFloat = testFloat(login[0]);
 		
 		//If any fields are empty or login is not a number 
-		if(login == '' || pass == '' || isNaN(login)===true || first == '' || last == ''){
+		if(login == '' || pass == '' || isNaN(login)===true || isFloat === true || first == '' || last == ''){
 			errorLog(res,"Please enter enter valid values in all fields");
 		}
 		else{
@@ -197,5 +200,17 @@ function callSearch(res){
 	
 }
 
+//Tests to see if user entered floating point number as login 
+function testFloat(login){
+	var i;
+	for(i=0; i < login.length;i++){
+		if(login[i] == '.'){
+			return true;
+			
+		}
+	}
+	
+	return false;
+}
 
 
