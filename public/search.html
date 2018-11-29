@@ -2,11 +2,74 @@
 <html>
 	<head>
 		<title> Search Page </title>
+		<!-- Vue Script -->
+		<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
+		<!-- Our custom Script -->
+		<script type="text/javascript" src="searchJava.js"></script>
+		<!-- jQuery Script -->
+		<script type="application/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 	
 	</head>
 
-	<body>
+	<body onload= 'init()'>
 		<h1>This is the search page</h1>
+		
+		<!-- Will need to add here the check box capabilities for users selecting subjects -->
+		
+		<!--Search Button used for filling table-->
+		<button type="button" onclick="fillTable()">Search</button>
+		
+	<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
+	<div id="results">
+		<table id="realTable">
+				<tr>
+					<th> Subject </th>
+					<th> Course Number </th>
+					<th> Section </th>
+					<th> Name </th>
+					<th> Building / Room </th>
+					<th> Professor </th>
+					<th> Credits </th>
+					<th> CRN </th>
+					<th> Amount Registered / Capacity </th>
+					<th> Waitlist </th>
+				</tr>
+				<tr v-for="item in searchResults">
+					<td class="tableData">
+						<center> {{item.subject}} </center>
+					</td>
+					<td class="tableData">
+						<center>{{item.course_number}}</center>
+					</td>
+					<td class="tableData">
+						<center>{{item.section_number}}</center>
+					</td>
+					<td class="tableData">
+						<center>{{item.course_name}}</center>
+					</td>
+					<td class="tableData">
+						<center>{{item.building}}</center> <center>{{item.room}}</center> 
+					</td>
+					
+					<td class="tableData">
+						<center> {{item.professors}} </center>
+					</td>
+					<td class="tableData">
+						<center>{{item.credits}}</center>
+					</td>
+					<td class="tableData">
+						<center>{{item.CRN}}</center>
+					</td>
+					<td class="tableData">
+						<center>{{item.capacity}}</center> 
+					</td>
+					<td class="tableData">
+						<center>{{item.waitlist}}</center>
+					</td>
+				</tr>
+		</table>	
+		
+	</div>
 		
 	</body>
 
