@@ -9,3 +9,19 @@
     white-space: nowrap;
     overflow: hidden;
 }
+
+.login {
+    position: absolute;
+    left: 45%;   
+}
+
+.purplebar {
+    background: #8546b1;
+    height: 75px;
+    width: 100%;
+    margin-bottom: 50px;
+}
+
+.buttons {
+    margin-top: 2px;
+}

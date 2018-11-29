@@ -4,10 +4,10 @@
 		<title> Home Page </title>
 
 		<link rel="stylesheet" href="style.css">
-		
+
 		<!--Used for hashing a password-->
 		<script type="text/javascript" src="md5.min.js"></script>
-		
+
 		<!-- Used to hash password before submitting -->
 		<script type="text/javascript">
 			function prepareSubmit(){
@@ -17,40 +17,43 @@
 				return true;
 			}
 		</script>
-		
+
 	</head>
 
 	<body onload="start()">
 		<!--St Thomas logo header -->
 		<a class="st-thomas-logo" href="http://www.stthomas.edu/">
-    			University of St. Thomas – Minnesota – A private, Catholic liberal arts university
+    			University of St. Thomas  EMinnesota  EA private, Catholic liberal arts university
     	</a>
 		<!-- About page -->
 		<a href="about.html">About Us</a>
-		
+
 		<!-- Begin of Form -->
-		<h1> UST Course Login: </h1>
-		<form id="subForm" onsubmit="prepareSubmit()" method= "POST" enctype= "multipart/form-data" >
+		<div class="purplebar">
+			<h1 class="login">UST Course Login:</h1>
+		</div>
+		<form id="subForm" onsubmit="prepareSubmit()" method= "POST" enctype= "multipart/form-data">
 			<!--Student/Faculty Drop Down -->
-			<select name="position">
+			<select class="login" name="position">
 			  <option value="student">Student</option>
 			  <option value="faculty">Faculty</option>
 			</select>
 			</br>
 			<!--Username-->
-			<input type= "text" placeholder="Login" name="login" /> <br/>
+			<input type= "text" placeholder="Login" name="login" class="login"/> <br/>
 			<!--Password, type = password conceals password when entering into database -->
-			<input id ="psw" type="password" placeholder="Password" name="passwd" /> <br/>
+			<input id ="psw" type="password" placeholder="Password" name="passwd"class="login"/> <br/>
+			<input id="log" formaction = "/login" type= "submit" value="Login" class="login buttons"/>
 			<!--Create New User, this button does not submit only expands other fields for submitting a new user-->
-			<input id="createNew" type= "button" value ="Create New User" onclick="create()"/>
+			<input id="createNew" type= "button" value ="Create New User" onclick="create()" class="login buttons" style="margin-left: 48px;"/>
 			<!--First Name after user selects create new user -->
-			<input id="first" type="text" placeholder="First Name" name = "firstName"/>
+			<input id="first" type="text" placeholder="First Name" name = "firstName" class="login"/><br/>
 			<!--Last Name after user selects create new user-->
-			<input id="last" type="text" placeholder="Last Name" name= "lastName"/>
+			<input id="last" type="text" placeholder="Last Name" name= "lastName" class="login"/><br/>
 			<!--Submit button for creating a new user, activates the push request-->
-			<input id="sub" formaction = "/new" type= "submit" value ="Submit New User"/>
+			<input id="sub" formaction = "/new" type= "submit" value ="Submit New User" class="login buttons"/>
 			<!--Login button for submiting -->
-			<input id="log" formaction = "/login" type= "submit" value ="Login"/>
+
 		</form>
 		<script>
 			<!--Hiding first name, last name and submit button on initial load -->
@@ -69,7 +72,7 @@
 			}
 		</script>
 	</body>
-	
+
 
 
 </html>
