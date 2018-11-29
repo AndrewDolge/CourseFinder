@@ -81,4 +81,22 @@ Five additional points for each item below (max of 30/25)
 	Allow students to create a wishlist of classes they want to preregister for
 	Students need to be able to view their wishlist and register to all of them with one click
 		If section is full put on waitlist		
-				
+		
+
+-----------------------------------
+
+
+11/28 Update and Next Steps:
+Author- Christian Linhardt 
+	
+	A. Homepage/Login requirement (1) is functionally complete but needs styling 
+	B. CL has started the search page (2) including the ability to fill the table based on a user pressing a search button
+			NEXT STEPS:
+				- Each subject represented as a checklist item for the user to select
+				- The optional CRN search box
+				- The optional Course_number search box
+				IMPORTANT: Once these are complete need adjust our post request and database functionality to handle a users ability to 1. Check multiple subjects at once 2. Search based on CRN 3. Search based on course number 
+
+
+
+		
