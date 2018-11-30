@@ -153,13 +153,13 @@ app.post('/new', (req, res) => {
 //When a user logs in and the search button is clicked, a post request is sent here
 //Database selects all information from both the Courses and Sections tables and sends the JSON object back to the browser
 //Will need to adjust with a for loop once we test for the possibility of a user selecting more than one subject 
-app.post('/login/:nconst', (req, res) => {
+app.post('/search/:nconst', (req, res) => {
 	//console.log(req.params.nconst);
 	var urlSubs = req.params.nconst
 	var subs = [];
 	subs = urlSubs.split("-");
 	//console.log(subs);
-	var sqlString = '';
+	var sqlString = "SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject IN ";
 	
 	var ind;
 	
@@ -179,16 +179,16 @@ app.post('/login/:nconst', (req, res) => {
 			
 		}
 	}
-	sqlString+= ")";
+	sqlString+= ") ORDER BY Sections.course_number, sections.section_number";
 	console.log(sqlString);
 		
 		//ust_db.all("SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject = \""+subs[0]+"\" OR Sections.subject = \""+subs[1]+"\" ORDER BY Sections.course_number, sections.section_number",(err, rows) => {
-		ust_db.all("SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject IN \""+sqlString+"\" ORDER BY Sections.course_number, sections.section_number",(err, rows) => {	
+		ust_db.all(sqlString, (err, rows) => {	
 				if (err) {
 					console.log('Error running query');
 				}
 				else {	
-						res.send(rows)
+						res.send(rows);
 						//toSend.push(rows);
 						
 				}
@@ -226,6 +226,19 @@ function backHome(res,reason,color){
 	
 
 }
+
+app.get('/depts', (req, res) => {
+	ust_db.all("SELECT * FROM Departments", (err, rows) => {	
+		console.log(err,rows);
+		if (err) {
+			console.log('Error running query');
+		}
+		else {	
+			res.send(rows);
+		}
+	});
+});
+
 
 //Function is used to send users to our search page on successful login
 function callSearch(res){

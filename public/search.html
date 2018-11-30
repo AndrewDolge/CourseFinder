@@ -12,17 +12,15 @@
 	</head>
 
 	<body onload= 'init()'>
+		<div id="app">
 		<h1>This is the search page</h1>
 		<!-- v-on:change= "onChange"-->
 		<div id="subjects">
 			<ul style= "list-style: none">
-				<li class="dontsplit">
-					<input   id= 'sub1' class= 'subSelect' type = 'checkbox' value="ACCT" /><label>ACCT: Accounting</label>
+				<li class="dontsplit" v-for="item in departments">
+					<input   v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label>
 				</li>
-				<li class="dontsplit">
-					<input  id = 'sub2' class = 'subSelect' type ='checkbox' value="CISC"/><label>CISC: Computer and Information Sciences</label>
-				</li>
-			</ul>
+			</ul>	
 		</div>
 		
 		<div id='searchBoxes'>
@@ -88,7 +86,7 @@
 		</table>	
 		
 	</div>
-		
+	</div>	
 	</body>
 
 

@@ -1,23 +1,18 @@
 var subArray = [];
+var vApp;
 function init(){
 	//searchResults contains an object of all information for each section from our section and courses database tables 
 	vApp = new Vue({
-		el: "#results",
-		data: {
-			searchResults: []
-		}
-
-	});
-	
-	vApp2 = new Vue({
-		el: "#searchBoxes",
+		el: "#app",
 		data: {
 			courseNumberSearch: '',
-			crnNumberSearch: ''
+			crnNumberSearch: '',
+			departments: [],
+			searchResults: []
 		}
 	});
 	
-	$(".subSelect").on("change", function(){
+	/*$(".subSelect").on("change", function(){
 		id = '#'+this.id;
 		if($(id).prop('checked') == true){
 				subArray.push(this.value);
@@ -28,8 +23,21 @@ function init(){
 			subArray.splice(index,1);
 		}
 		
+	});*/
+	getDepts();
+}
+
+function getDepts(){
+	var settings = {
+		"async": true,
+		"crossDomain": true,
+		"url": "/depts",
+		"method": "GET"
+	}
+	$.ajax(settings).done(function (response) {
+		vApp.departments = response;
+		console.log(response);
 	});
-	
 }
 
 //fillTable method sends a post request to our server to obtain all needed information for the subjects selected by the user 
@@ -37,17 +45,27 @@ function fillTable(){
 		//console.log(vApp2.courseNumberSearch);
 		//console.log(vApp2.crnNumberSearch);
 		
-		if(subArray.length > 0){
+		
 			var index;
 			urlString = ''
-			for(index = 0; index < subArray.length; index++ ){
+			var atLeastOneChecked = false;
+			for(index =0; index<vApp.departments.length; index++){
+				var x = document.getElementById(vApp.departments[index].subject);
+				if (x.checked == true){
+					urlString += x.id + '-';
+					atLeastOneChecked = true;
+				}
+			}
+			if(atLeastOneChecked){
+			urlString = urlString.substring(0, urlString.length-1);
+		/*	for(index = 0; index < subArray.length; index++ ){
 				if(index > 0){
 					urlString = urlString += '-';
 				}
 				
 				urlString = urlString += subArray[index];
-			
-			}
+				
+			}*/
 			//console.log(urlString);
 		
 			var settings = {
@@ -55,10 +73,10 @@ function fillTable(){
 				"crossDomain": true,
 				//Hardcoded CISC for testing purposes, will need to adjust this once we add the ability for the user to select subjects from a checklist 
 				//"url": "/login/ACCT",
-				"url": "/login/"+urlString,
+				"url": "/search/"+urlString,
 				"method": "POST"
 			}
-
+			
 			$.ajax(settings).done(function (response) {
 				var i;
 				var sub;
@@ -103,11 +121,9 @@ function fillTable(){
 				console.log(response);
 			
 			})
-		} //if subArray.length > 0
-		else{
-			
-			console.log("error select atleast one subject");
-		}
+			}else{
+				console.log("Must select at least one subject");
+			}
 }
 
 
