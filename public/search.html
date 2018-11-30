@@ -13,7 +13,25 @@
 
 	<body onload= 'init()'>
 		<h1>This is the search page</h1>
+		<!-- v-on:change= "onChange"-->
+		<div id="subjects">
+			<ul style= "list-style: none">
+				<li class="dontsplit">
+					<input   id= 'sub1' class= 'subSelect' type = 'checkbox' value="ACCT" /><label>ACCT: Accounting</label>
+				</li>
+				<li class="dontsplit">
+					<input  id = 'sub2' class = 'subSelect' type ='checkbox' value="CISC"/><label>CISC: Computer and Information Sciences</label>
+				</li>
+			</ul>
+		</div>
 		
+		<div id='searchBoxes'>
+		
+		<input id="courseSearch" type="text" v-model="courseNumberSearch" placeholder= "Search by course number"> </input>
+		<input id="crnSearch" type="text" v-model="crnNumberSearch" placeholder= "Search by CRN"> </input>
+		
+		</div>
+	
 		<!-- Will need to add here the check box capabilities for users selecting subjects -->
 		
 		<!--Search Button used for filling table-->

@@ -154,17 +154,47 @@ app.post('/new', (req, res) => {
 //Database selects all information from both the Courses and Sections tables and sends the JSON object back to the browser
 //Will need to adjust with a for loop once we test for the possibility of a user selecting more than one subject 
 app.post('/login/:nconst', (req, res) => {
+	//console.log(req.params.nconst);
+	var urlSubs = req.params.nconst
+	var subs = [];
+	subs = urlSubs.split("-");
+	//console.log(subs);
+	var sqlString = '';
 	
-	ust_db.all("SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject = ? ORDER BY Sections.course_number, sections.section_number",[req.params.nconst],(err, rows) => {
+	var ind;
+	
+	for(ind=0; ind < subs.length; ind++){
+		if(ind === 0){
+			sqlString += "(";
+			sqlString += "'";
+			sqlString+= subs[ind];
+			sqlString += "'";
 			
+		}
+		else{
+			sqlString += ",";
+			sqlString += "'";
+			sqlString+= subs[ind];
+			sqlString += "'";
+			
+		}
+	}
+	sqlString+= ")";
+	console.log(sqlString);
+		
+		//ust_db.all("SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject = \""+subs[0]+"\" OR Sections.subject = \""+subs[1]+"\" ORDER BY Sections.course_number, sections.section_number",(err, rows) => {
+		ust_db.all("SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject IN \""+sqlString+"\" ORDER BY Sections.course_number, sections.section_number",(err, rows) => {	
 				if (err) {
 					console.log('Error running query');
 				}
 				else {	
 						res.send(rows)
+						//toSend.push(rows);
+						
 				}
 			});
 	
+
 	
 });
 
