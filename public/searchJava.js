@@ -25,6 +25,7 @@ function init(){
 		
 	});*/
 	getDepts();
+	modSubject();
 }
 
 function getDepts(){
@@ -38,6 +39,10 @@ function getDepts(){
 		vApp.departments = response;
 		console.log(response);
 	});
+}
+
+function modSubject(){
+	//document.getElementsByClassName("subSelect")style.display = "none";
 }
 
 //fillTable method sends a post request to our server to obtain all needed information for the subjects selected by the user 
@@ -57,71 +62,72 @@ function fillTable(){
 				}
 			}
 			if(atLeastOneChecked){
-			urlString = urlString.substring(0, urlString.length-1);
-		/*	for(index = 0; index < subArray.length; index++ ){
-				if(index > 0){
-					urlString = urlString += '-';
-				}
-				
-				urlString = urlString += subArray[index];
-				
-			}*/
-			//console.log(urlString);
-		
-			var settings = {
-				"async": true,
-				"crossDomain": true,
-				//Hardcoded CISC for testing purposes, will need to adjust this once we add the ability for the user to select subjects from a checklist 
-				//"url": "/login/ACCT",
-				"url": "/search/"+urlString,
-				"method": "POST"
-			}
-			
-			$.ajax(settings).done(function (response) {
-				var i;
-				var sub;
-				var cNum;
-				var cred;
-				var cName;
-				var des;
-				
-				for(i = 0; i < response.length; i++){
-					sub = response[i].subject;
-					cNum = response[i].course_number;
-					sNum = response[i].section_number;
-					cName =  response[i].name;
-					build = response[i].building;
-					roomNumber = response[i].room;
-					prof = response[i].professors;
-					cred = response[i].credits
-					crn = response[i].crn;
-					time = response[i].times;
-					descrip = response[i].description
-					reg = response[i].registered,
-					cap = response[i].capacity,
-					wait = 'Placeholder' //will have to manually calculate
+				urlString = urlString.substring(0, urlString.length-1);
+			/*	for(index = 0; index < subArray.length; index++ ){
+					if(index > 0){
+						urlString = urlString += '-';
+					}
 					
-					vApp.searchResults.push({
-						subject: sub,
-						course_number: cNum,
-						section_number: sNum,
-						course_name: cName,
-						building: build,
-						room: roomNumber,
-						professors: prof,
-						credits: cred,
-						CRN: crn,
-						times: time,
-						descrip: des,
-						registered: reg,
-						capacity: cap,
-						waitlist: wait
-					});
-				}
-				console.log(response);
+					urlString = urlString += subArray[index];
+					
+				}*/
+				//console.log(urlString);
 			
-			})
-			}else{
+				var settings = {
+					"async": true,
+					"crossDomain": true,
+					//Hardcoded CISC for testing purposes, will need to adjust this once we add the ability for the user to select subjects from a checklist 
+					//"url": "/login/ACCT",
+					"url": "/search/"+urlString,
+					"method": "POST"
+				}
+				
+				$.ajax(settings).done(function (response) {
+					var i;
+					var sub;
+					var cNum;
+					var cred;
+					var cName;
+					var des;
+					
+					for(i = 0; i < response.length; i++){
+						sub = response[i].subject;
+						cNum = response[i].course_number;
+						sNum = response[i].section_number;
+						cName =  response[i].name;
+						build = response[i].building;
+						roomNumber = response[i].room;
+						prof = response[i].professors;
+						cred = response[i].credits
+						crn = response[i].crn;
+						time = response[i].times;
+						descrip = response[i].description
+						reg = response[i].registered,
+						cap = response[i].capacity,
+						wait = 'Placeholder' //will have to manually calculate
+						
+						vApp.searchResults.push({
+							subject: sub,
+							course_number: cNum,
+							section_number: sNum,
+							course_name: cName,
+							building: build,
+							room: roomNumber,
+							professors: prof,
+							credits: cred,
+							CRN: crn,
+							times: time,
+							descrip: des,
+							registered: reg,
+							capacity: cap,
+							waitlist: wait
+						});
+					}
+					console.log(response);
+				
+				})
+			}
+			else{
 				console.log("Must select at least one subject");
 			}
 }

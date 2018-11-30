@@ -16,7 +16,7 @@
 		<h1>This is the search page</h1>
 		<!-- v-on:change= "onChange"-->
 		<div id="subjects">
-			<ul style= "list-style: none">
+			<ul id="list" style= "list-style: none">
 				<li class="dontsplit" v-for="item in departments">
 					<input   v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label>
 				</li>
@@ -88,7 +88,11 @@
 	</div>
 	</div>	
 	</body>
-
+	<script>
+		function modSubject(){
+			document.getElementById("list")style.display = "none";
+		}
+	</script>
 
 
 </html>
