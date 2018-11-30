@@ -179,7 +179,7 @@ app.post('/search/:nconst', (req, res) => {
 			
 		}
 	}
-	sqlString+= ") ORDER BY Sections.course_number, sections.section_number";
+	sqlString+= ") ORDER BY Sections.subject, Sections.course_number, sections.section_number";
 	console.log(sqlString);
 		
 		//ust_db.all("SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject = \""+subs[0]+"\" OR Sections.subject = \""+subs[1]+"\" ORDER BY Sections.course_number, sections.section_number",(err, rows) => {
@@ -228,7 +228,7 @@ function backHome(res,reason,color){
 }
 
 app.get('/depts', (req, res) => {
-	ust_db.all("SELECT * FROM Departments", (err, rows) => {	
+	ust_db.all("SELECT * FROM Departments ORDER BY Departments.subject", (err, rows) => {	
 		console.log(err,rows);
 		if (err) {
 			console.log('Error running query');

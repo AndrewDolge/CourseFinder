@@ -16,11 +16,11 @@
 		<h1>This is the search page</h1>
 		<!-- v-on:change= "onChange"-->
 		<div id="subjects">
-			<ul id="list" style= "list-style: none">
-				<li class="dontsplit" v-for="item in departments">
-					<input   v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label>
-				</li>
-			</ul>	
+			<table id="list" style= "list-style: none">
+				<tr class="dontsplit" v-for="item in departments">
+					<td><input   v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
+				</tr>
+			</table>	
 		</div>
 		
 		<div id='searchBoxes'>
@@ -33,11 +33,11 @@
 		<!-- Will need to add here the check box capabilities for users selecting subjects -->
 		
 		<!--Search Button used for filling table-->
-		<button type="button" onclick="fillTable()">Search</button>
+		<button type="button" onclick="checkStatus()">Search</button>
 		
 	<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
 	<div id="results">
-		<table id="realTable">
+		<table id="realTable" style="border-width: 1px; border-color: black; border: solid;">
 				<tr>
 					<th> Subject </th>
 					<th> Course Number </th>
@@ -50,49 +50,54 @@
 					<th> Amount Registered / Capacity </th>
 					<th> Waitlist </th>
 				</tr>
+				<!-- this doesnt work-->
 				<tr v-for="item in searchResults">
-					<td class="tableData">
-						<center> {{item.subject}} </center>
-					</td>
-					<td class="tableData">
-						<center>{{item.course_number}}</center>
-					</td>
-					<td class="tableData">
-						<center>{{item.section_number}}</center>
-					</td>
-					<td class="tableData">
-						<center>{{item.course_name}}</center>
-					</td>
-					<td class="tableData">
-						<center>{{item.building}}</center> <center>{{item.room}}</center> 
-					</td>
+					<table>
+						<tr>
+							<td class="tableData">
+								<center> {{item.subject}} </center>
+							</td>
+							<td class="tableData">
+								<center>{{item.course_number}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.section_number}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.course_name}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.building}}</center> <center>{{item.room}}</center> 
+							</td>
+							
+							<td class="tableData">
+								<center> {{item.professors}} </center>
+							</td>
+							<td class="tableData">
+								<center>{{item.credits}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.CRN}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.registered}}/{{item.capacity}}</center> 
+							</td>
+							<td class="tableData">
+								<center>{{item.waitlist}}</center>
+							</td>
+							<!--insert table with course data-->
+						</tr>
+						<tr>
+							Hello world
+						</tr>
+					</table>
 					
-					<td class="tableData">
-						<center> {{item.professors}} </center>
-					</td>
-					<td class="tableData">
-						<center>{{item.credits}}</center>
-					</td>
-					<td class="tableData">
-						<center>{{item.CRN}}</center>
-					</td>
-					<td class="tableData">
-						<center>{{item.capacity}}</center> 
-					</td>
-					<td class="tableData">
-						<center>{{item.waitlist}}</center>
-					</td>
 				</tr>
 		</table>	
 		
 	</div>
 	</div>	
 	</body>
-	<script>
-		function modSubject(){
-			document.getElementById("list")style.display = "none";
-		}
-	</script>
 
 
 </html>
