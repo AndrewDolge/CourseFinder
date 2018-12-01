@@ -51,8 +51,10 @@ function checkStatus(){
 function fillTable(){
 	
 			var index;
-			urlString = ''
+			var urlString = ''
 			var atLeastOneChecked = false;
+		
+			
 			//Builds up our url based on checked subjects
 			//Adds a '-' for parsing by the server 
 			for(index =0; index < vApp.departments.length; index++){
@@ -64,8 +66,26 @@ function fillTable(){
 			}
 			//If the user has selected at least one checkbox
 			if(atLeastOneChecked){
+				
 				urlString = urlString.substring(0, urlString.length-1);
-			
+				
+				//If user searches a specific course number add to URL
+				if(vApp.courseNumberSearch !== ''){
+					
+					urlString += '+' + vApp.courseNumberSearch
+					
+					if(vApp.crnNumberSearch == ''){
+						urlString += '+'
+					}
+				}
+				//If user searches a specific CRN add to URL 
+				if(vApp.crnNumberSearch !== ''){
+					if(vApp.courseNumberSearch == ''){
+						urlString += '+'
+					}
+					urlString += '+' + vApp.crnNumberSearch
+				}
+				
 				var settings = {
 					"async": true,
 					"crossDomain": true,

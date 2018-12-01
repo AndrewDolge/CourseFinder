@@ -153,44 +153,59 @@ app.post('/new', (req, res) => {
 //When a user logs in and the search button is clicked, a post request is sent here
 //Database selects all information from both the Courses and Sections tables and sends the JSON object back to the browser
 app.post('/search/:nconst', (req, res) => {
-	//console.log(req.params.nconst);
+	
+	//1. Parse the subjects sent in the url and place them in subs array
 	var urlSubs = req.params.nconst
 	var subs = [];
+	var courseNumReq = '';
+	var crnReq = '';
 	subs = urlSubs.split("-");
 	
-	var sqlString = "SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject IN ";
+	/*2. If user also searched with crn number or course number will be added to end of url separated by +
+		 Parse the last position in the subs array to get the course number and/or crn number */
+	var checkSearch =[];
+	checkSearch = subs[subs.length-1].split("+");
 	
+	subs[subs.length-1] = checkSearch[0];
+	
+	if(checkSearch.length > 1){
+		courseNumReq = checkSearch[1];
+		crnReq = checkSearch[2];
+	}
+	
+	
+	//3. Place all the subjects in the subs array into the proper format to be handled for the SQL statement
+	var subsForSQL = '';
 	var ind;
-	//For loop used to build proper format of our array of requested subjects for SQL statement
 	for(ind=0; ind < subs.length; ind++){
 		if(ind === 0){
-			sqlString += "(";
-			sqlString += "'";
-			sqlString+= subs[ind];
-			sqlString += "'";
+			subsForSQL += "(";
+			subsForSQL += "'";
+			subsForSQL += subs[ind];
+			subsForSQL += "'";
 			
 		}
 		else{
-			sqlString += ",";
-			sqlString += "'";
-			sqlString+= subs[ind];
-			sqlString += "'";
+			subsForSQL += ",";
+			subsForSQL += "'";
+			subsForSQL += subs[ind];
+			subsForSQL += "'";
 			
 		}
 	}
-	sqlString+= ") ORDER BY Sections.subject, Sections.course_number, sections.section_number";
-	//console.log(sqlString);
-		
-		ust_db.all(sqlString, (err, rows) => {	
-				if (err) {
-					console.log('Error running query');
-				}
-				else {	
-						res.send(rows);
-				}
-			});
 	
+	//4. If no crn number or course number is searched, call searchNoText function
+	if(crnReq == '' && courseNumReq == ''){
+		 searchNoText(res,subsForSQL);
+		
+	}
+	
+	//5. If a crn or course number is added to the search, call searchWithText function 
+	else{
+		searchWithText(res,subsForSQL,crnReq,courseNumReq);
 
+	}
+	
 	
 });
 
@@ -269,4 +284,104 @@ function testFloat(login){
 	return false;
 }
 
+//searchNoText function is used to call the SQL database if a user searches based on checkboxes but no crn or course number 
+function searchNoText(res,subsForSQL){
+	
+	var sqlString = "SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.subject IN ";
+	
+	sqlString += subsForSQL;
 
+	sqlString+= ") ORDER BY Sections.subject, Sections.course_number, sections.section_number";
+	//console.log(sqlString);
+		
+	ust_db.all(sqlString, (err, rows) => {	
+			if (err) {
+				console.log('Error running query');
+			}
+			else {
+					res.send(rows);
+					
+			}
+		});
+	
+}
+
+//searchWithText function is used to call the SQL database if a user searches based on checkboxes and a crn and/or course number 
+function searchWithText(res,subsForSQL,crnNum,courseNum){
+
+	var isCRN = true;
+	var isCourseNum = true;
+	
+	//Did a user search a crn 
+	if(crnNum.length < 1){
+		isCRN = false;
+	}
+	else{
+		crnNum = parseInt(crnNum);
+	}
+	
+	//Did a user search a course number 
+	if(courseNum.length < 1){
+		isCourseNum = false;
+	}
+	
+	//SQL search for only course number 
+	if(isCourseNum == true && isCRN == false){
+		var sqlString = "SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.course_number = \""+courseNum+"\" AND Sections.subject IN ";
+	
+		sqlString += subsForSQL;
+		sqlString+= ") ORDER BY Sections.subject, Sections.course_number, sections.section_number";
+		//console.log(sqlString);
+			
+			ust_db.all(sqlString, (err, rows) => {	
+					if (err) {
+						console.log('Error running query');
+					}
+					else {	
+							res.send(rows);
+					}
+				});
+			
+	}
+	
+	//SQL search for only CRN
+	if(isCourseNum == false && isCRN == true){
+		
+			var sqlString = "SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.crn = "+crnNum+" AND Sections.subject IN ";
+	
+			sqlString += subsForSQL;
+			sqlString+= ")";
+			//console.log(sqlString);
+				
+			ust_db.all(sqlString, (err, rows) => {	
+					if (err) {
+						console.log('Error running query');
+					}
+					else {	
+							res.send(rows);
+					}
+				});
+		
+		
+	}
+	
+	//SQL search for both course number and CRN
+	if(isCourseNum == true && isCRN == true){
+	
+		var sqlString = "SELECT  Sections.subject, Sections.course_number, Sections.section_number, Courses.name, Sections.building, Sections.room, Sections.professors, Courses.credits, Sections.crn, Sections.registered, Sections.capacity, Sections.times, Courses.description FROM Sections INNER JOIN Courses ON Sections.course_number=Courses.course_number AND Sections.subject = Courses.subject WHERE Sections.course_number = \""+courseNum+"\" AND Sections.subject IN ";
+		
+			sqlString += subsForSQL;
+			sqlString+= ") AND Sections.crn = "+crnNum;
+			
+				ust_db.all(sqlString, (err, rows) => {	
+						if (err) {
+							console.log('Error running query');
+						}
+						else {	
+								res.send(rows);
+						}
+					});
+			
+		
+	}
+}
