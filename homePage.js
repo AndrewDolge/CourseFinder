@@ -76,7 +76,7 @@ app.post('/login' , (req, res) => {
 						
 						if(pass == rows[0].password){
 							//Call to our search page if login and password match 
-							callSearch(res);
+							callSearch(res,login);
 							
 						} 
 						
@@ -209,6 +209,19 @@ app.post('/search/:nconst', (req, res) => {
 	
 });
 
+//Get request is executed after login in to store the users personal database information
+app.get('/position/:pconst', (req, res) => {
+	var login = req.params.pconst
+	
+	ust_db.all("SELECT * FROM People WHERE university_id == ?",login, (err, rows) => {	
+		if (err) {
+			console.log('Error running query');
+		}
+		else {	
+			res.send(rows);
+		}
+	});
+});
 
 //Sends all subjects and fullname from department table to browser for checkboxes
 app.get('/depts', (req, res) => {
@@ -252,7 +265,7 @@ function backHome(res,reason,color){
 }
 
 //Function is used to send users to our search page on successful login
-function callSearch(res){
+function callSearch(res,log){
 	
 	fs.readFile(path.join(public_dir, 'search.html'), (err, data) => { 
 		if(err){
@@ -262,8 +275,10 @@ function callSearch(res){
 		} 
 		
 		else{
-			var mime_type= mime.lookup('search.html') || 'text/plain'; 
+			var mime_type= mime.lookup('search.html') || 'text/html'; 
 			res.writeHead(200, {'Content-Type': mime_type}); 
+			//Added the user login name in order to store it for later querying in the searchJava page
+			res.write("<p id = 'user'> Welcome User: " +log+ "</p>");
 			res.write(data); 
 			res.end();
 		} 

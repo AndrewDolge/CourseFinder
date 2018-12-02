@@ -1,4 +1,3 @@
-
 var vApp;
 function init(){
 	//Vue app used for template in search.html
@@ -12,12 +11,26 @@ function init(){
 			//array of objects from the SQL Departments table, filled by function getDepts()
 			departments: [],
 			//array of object from the SQL courses and sections tables, filled by fillTable()
-			searchResults: []
+			searchResults: [],
+			//Users login
+			login: '',
+			//Users positon
+			position: ''
 		}
 	});
 	
+	document.getElementsByClassName("hideInfo").display = "none";
 	getDepts();
 	modSubject();
+	
+	//Call to getLogin to parse the HTML containing the users id
+	vApp.login = getLogin();
+	
+	//Call to getPosition function to get request the position of the user 
+	//Gets all of the users data from the SQL people table, do this once after login or after each search?
+	getPosition();
+	//console.log(login);
+	
 }
 
 //gets the subject and full name for each department from our SQL departments table, used for filling our template of checkboxes
@@ -37,6 +50,57 @@ function getDepts(){
 //Function in process
 function modSubject(){
 	//document.getElementsByClassName("subSelect")style.display = "none";
+}
+
+//hello there
+function reveal(crn, times){
+	console.log("subject"+crn);
+	var x = document.getElementById(crn).style;//.display = 'table-row';
+	console.log(x);
+	if(x.display == 'none'){
+		x.display = 'table-row';
+	}
+	else if(x.display == 'table-row'){
+		x.display = 'none';
+	}
+	loadthis(crn+'time',times);
+}
+
+function loadthis(y,z){
+	console.log('here');
+	var times = '';
+	var x = JSON.parse(z);
+	console.log(x.T);
+	if(x.M != null){
+		times += "M " +x.M;
+	}
+	if(x.T != null){
+		times += "T " +x.T;
+	}
+	if(x.W != null){
+		times += "W " +x.W;
+	}
+	if(x.R !=  null){
+		times += "R " +x.R;
+	}
+	if(x.F != null){
+		times += "F " +x.F;
+	}
+	if(x.SA != null){
+		times += "SA " +x.SA;
+	}
+	if(x.SU != null){
+		times += "SU " +x.SU;
+	}
+	document.getElementById(y).innerHTML = times;
+	
+	/*for(i=0;i<z.length;i++){
+		if(z[i]!='<'&&z[i]!='>'&&z[i]!='b'&&z[i]!='r'&&z[i]!='{'&&z[i]!='}'&&z[i]!='/'){
+			newStr += z[i];
+		}
+	}
+
+	console.log(newStr);*/
 }
 
 //Used to check if a user hass previously searched from the page, if so clear the searchResults array before the next search begins
@@ -112,9 +176,9 @@ function fillTable(){
 						cred = response[i].credits
 						crn = response[i].crn;
 						time = response[i].times;
-						descrip = response[i].description
-						reg = response[i].registered,
-						cap = response[i].capacity,
+						des = response[i].description;
+						reg = response[i].registered;
+						cap = response[i].capacity;
 						wait = 'Placeholder' //will have to manually calculate
 						
 						vApp.searchResults.push({
@@ -128,14 +192,16 @@ function fillTable(){
 							credits: cred,
 							CRN: crn,
 							times: time,
-							descrip: des,
+							description: des,
 							registered: reg,
 							capacity: cap,
 							waitlist: wait
 						});
 					} //for(i = 0; i < response.length; i++)
-						
+					
+					
 					console.log(response);
+					
 				
 				}) //ajax(settings)
 			} //if(atLeastOneChecked)
@@ -145,5 +211,37 @@ function fillTable(){
 			}
 } //fillTable
 
+
+//function getLogin is used to parse the html written in the search.html page to store the user's login
+function getLogin(){
+	
+	var fromSearch = document.getElementById('user').innerHTML;
+	var parsed = fromSearch.split(":");
+	var login = parsed[1].trim();
+	return login;
+	
+}
+
+//function gets the position (student or faculty) and stores it in our vApp
+function getPosition(){
+	console.log(vApp.login);
+	var info = {
+				"async": true,
+				"crossDomain": true,
+				"url": "/position/"+vApp.login,
+				"method": "GET"
+			   }
+			   
+	$.ajax(info).done(function (response) {
+			
+			console.log(response);
+			vApp.position = response[0].position;
+			console.log(vApp.position);
+		
+		
+	});
+	
+
+}
 
 
