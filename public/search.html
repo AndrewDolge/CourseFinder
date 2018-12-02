@@ -43,7 +43,7 @@
 			
 		<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
 			<div id="results">
-				<table id="realTable" style="border-width: 1px; border-color: black; border: solid;">
+				<!--<table id="realTable" style="border-width: 1px; border-color: black; border: solid;">
 						<tr>
 							<th> Subject </th>
 							<th> Course Number </th>
@@ -56,8 +56,8 @@
 							<th> Amount Registered / Capacity </th>
 							<th> Waitlist </th>
 						</tr>
-				</table>
-					<table v-for="item in searchResults" style="border-width: 1px; border-color: black; border: solid;">
+				</table>-->
+					<table v-for="item in searchResults" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
 					<!--<tr style="display: 'none';">
 							<th style="display: 'none';"> Subject </th>
 							<th style="display: 'none';"> Course Number </th>
@@ -71,19 +71,16 @@
 							<th style="display: 'none';"> Waitlist </th>
 						</tr>-->
 					<tr  v-on:click="reveal(item.CRN,item.times)" onMouseOver="this.style.cursor='pointer'">
-						<td class="tableData">
+						<td class="tableData" style="width:75px;">
 							<center> {{item.subject}} </center>
 						</td>
-						<td class="tableData">
-							<center>{{item.course_number}}</center>
-						</td>
-						<td class="tableData">
-							<center>{{item.section_number}}</center>
+						<td class="tableData" style="width: 75px;">
+							<center>{{item.course_number}}-{{item.section_number}}</center>
 						</td>
 						<td class="tableData">
 							<center>{{item.course_name}}</center>
 						</td>
-						<td class="tableData">
+						<td class="tableData" style="width: 150px;">
 							<center>{{item.building}}</center> <center>{{item.room}}</center> 
 						</td>
 						
@@ -105,7 +102,7 @@
 						<!--insert table with course data-->
 					</tr>
 					<tr v-bind:id="item.CRN" class="hideInfo" style="display: none;">
-						<td>
+						<td style="width: 300px;">
 							{{item.description}}
 						</td>
 						<td v-bind:id="item.CRN+'time'">

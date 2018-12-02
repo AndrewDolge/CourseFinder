@@ -57,29 +57,29 @@ function loadthis(y,z){
 	console.log('here');
 	var times = '';
 	var x = JSON.parse(z);
-	console.log(x);
-	if(x.M != 'null'){
+	console.log(x.T);
+	if(x.M != null){
 		times += "M " +x.M;
 	}
-	if(x.T != 'null'){
+	if(x.T != null){
 		times += "T " +x.T;
 	}
-	if(x.W != 'null'){
+	if(x.W != null){
 		times += "W " +x.W;
 	}
-	if(x.R != 'null'){
+	if(x.R !=  null){
 		times += "R " +x.R;
 	}
-	if(x.F != 'null'){
+	if(x.F != null){
 		times += "F " +x.F;
 	}
-	if(x.SA != 'null'){
+	if(x.SA != null){
 		times += "SA " +x.SA;
 	}
-	if(x.SU != 'null'){
+	if(x.SU != null){
 		times += "SU " +x.SU;
 	}
-	document.getElementById(y).innerHTML = JSON.parse(times);
+	document.getElementById(y).innerHTML = times;
 	
 	/*for(i=0;i<z.length;i++){
 		if(z[i]!='<'&&z[i]!='>'&&z[i]!='b'&&z[i]!='r'&&z[i]!='{'&&z[i]!='}'&&z[i]!='/'){
