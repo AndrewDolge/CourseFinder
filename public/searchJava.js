@@ -40,9 +40,8 @@ function modSubject(){
 }
 
 //hello there
-function reveal(crn){
+function reveal(crn, times){
 	console.log("subject"+crn);
-	
 	var x = document.getElementById(crn).style;//.display = 'table-row';
 	console.log(x);
 	if(x.display == 'none'){
@@ -51,6 +50,25 @@ function reveal(crn){
 	else if(x.display == 'table-row'){
 		x.display = 'none';
 	}
+	loadthis(crn+'time',times);
+}
+
+function loadthis(y,z){
+	console.log('here');
+	var times = [];
+	var newS = '';
+	var i;
+	var x = document.getElementById(y);
+	console.log(x);
+	for(i=0;i<z.length;i++){
+		if(z[i]!='<'&&z[i]!='>'&&z[i]!='b'&&z[i]!='r'&&z[i]!='{'&&z[i]!='}'&&z[i]!='/'){
+			newS += z[i];
+		}
+	}
+	for(i=0;i<newS.length;i++){
+		
+	}
+	console.log(newS);
 }
 
 //Used to check if a user hass previously searched from the page, if so clear the searchResults array before the next search begins
@@ -126,9 +144,9 @@ function fillTable(){
 						cred = response[i].credits
 						crn = response[i].crn;
 						time = response[i].times;
-						descrip = response[i].description
-						reg = response[i].registered,
-						cap = response[i].capacity,
+						des = response[i].description;
+						reg = response[i].registered;
+						cap = response[i].capacity;
 						wait = 'Placeholder' //will have to manually calculate
 						
 						vApp.searchResults.push({
@@ -142,7 +160,7 @@ function fillTable(){
 							credits: cred,
 							CRN: crn,
 							times: time,
-							descrip: des,
+							description: des,
 							registered: reg,
 							capacity: cap,
 							waitlist: wait

@@ -70,7 +70,7 @@
 							<th style="display: 'none';"> Amount Registered / Capacity </th>
 							<th style="display: 'none';"> Waitlist </th>
 						</tr>-->
-					<tr  v-on:click="reveal(item.CRN)" onMouseOver="this.style.cursor='pointer'">
+					<tr  v-on:click="reveal(item.CRN,item.times)" onMouseOver="this.style.cursor='pointer'">
 						<td class="tableData">
 							<center> {{item.subject}} </center>
 						</td>
@@ -106,7 +106,9 @@
 					</tr>
 					<tr v-bind:id="item.CRN" class="hideInfo" style="display: none;">
 						<td>
-							hello world
+							{{item.description}}
+						</td>
+						<td v-bind:id="item.CRN+'time'">
 						</td>
 					</tr>
 					</table>	
