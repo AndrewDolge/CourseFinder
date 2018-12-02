@@ -83,7 +83,7 @@ function GetData(term, year) {
 		/*The received info is one large string, so on receiving info we call various functions to parse the string for the info we need
 		  Each function just finds the correct class the information is labeled under for each course and returns it in an array*/
 		https.get(request, (res) => {
-			console.log("fetched data for department: " + depart[i] + " " +i)
+			console.log("fetching data for department: " + depart[i] + " " +i);
 			//body will contain the large string returned from the St. Thomas site that needs to be parsed 
 			var body = "";
 			
@@ -114,7 +114,9 @@ function GetData(term, year) {
 			res.on("end", () => {
 					var pattern = /(<h3 style="margin-top:1.5rem">).+<\/h3>/g;
 					var match = body.match(pattern);
+
 					if(match != null){
+						
 						//Once receive data call each function
 						var i; 
 						profArr= getProf(body);

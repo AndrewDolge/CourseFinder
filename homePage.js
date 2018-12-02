@@ -8,7 +8,7 @@ var multiparty = require('multiparty');
 var app = express(); 
 var mime = require('mime-types');
 
-var port = 8014;
+var port = 8006;
 var public_dir = path.join(__dirname, 'public'); 
 
 //Connection to our database
