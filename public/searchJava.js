@@ -15,7 +15,7 @@ function init(){
 			searchResults: []
 		}
 	});
-	
+	document.getElementsByClassName("hideInfo").display = "none";
 	getDepts();
 	modSubject();
 }
@@ -37,6 +37,20 @@ function getDepts(){
 //Function in process
 function modSubject(){
 	//document.getElementsByClassName("subSelect")style.display = "none";
+}
+
+//hello there
+function reveal(crn){
+	console.log("subject"+crn);
+	
+	var x = document.getElementById(crn).style;//.display = 'table-row';
+	console.log(x);
+	if(x.display == 'none'){
+		x.display = 'table-row';
+	}
+	else if(x.display == 'table-row'){
+		x.display = 'none';
+	}
 }
 
 //Used to check if a user hass previously searched from the page, if so clear the searchResults array before the next search begins
