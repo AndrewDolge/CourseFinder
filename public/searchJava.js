@@ -55,20 +55,39 @@ function reveal(crn, times){
 
 function loadthis(y,z){
 	console.log('here');
-	var times = [];
-	var newS = '';
-	var i;
-	var x = document.getElementById(y);
+	var times = '';
+	var x = JSON.parse(z);
 	console.log(x);
-	for(i=0;i<z.length;i++){
+	if(x.M != 'null'){
+		times += "M " +x.M;
+	}
+	if(x.T != 'null'){
+		times += "T " +x.T;
+	}
+	if(x.W != 'null'){
+		times += "W " +x.W;
+	}
+	if(x.R != 'null'){
+		times += "R " +x.R;
+	}
+	if(x.F != 'null'){
+		times += "F " +x.F;
+	}
+	if(x.SA != 'null'){
+		times += "SA " +x.SA;
+	}
+	if(x.SU != 'null'){
+		times += "SU " +x.SU;
+	}
+	document.getElementById(y).innerHTML = JSON.parse(times);
+	
+	/*for(i=0;i<z.length;i++){
 		if(z[i]!='<'&&z[i]!='>'&&z[i]!='b'&&z[i]!='r'&&z[i]!='{'&&z[i]!='}'&&z[i]!='/'){
-			newS += z[i];
+			newStr += z[i];
 		}
 	}
-	for(i=0;i<newS.length;i++){
-		
-	}
-	console.log(newS);
+
+	console.log(newStr);*/
 }
 
 //Used to check if a user hass previously searched from the page, if so clear the searchResults array before the next search begins
