@@ -110,7 +110,9 @@
 						
 						<!-- Register / View Roster buttons depending on position of the user -->
 						<td> <span v-if="position === 'student'">  <button type="button" v-on:click="register(item.CRN)">Register</button> </span> </td>
-						<td> <span v-if="position === 'faculty'"> <button type="button" onclick="console.log('hello')">View Roster</button> </span> </td>
+						<td> <span v-if="position === 'faculty'"> <button type="button" v-on:click="viewRoster(item.CRN)">View Roster</button> </span> </td>
+						<!--Displays the the roster of the CRN for a faculty when requested-->
+						<td v-for="stuff in viewRosterResults"> <span v-if="viewRosterResults.length > 0 && item.CRN == viewRegCRN"> {{stuff.university_id}} - {{stuff.first_name}} {{stuff.last_name}} </span> </td>
 						
 					</tr>
 				</table>	

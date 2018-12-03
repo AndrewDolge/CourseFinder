@@ -15,7 +15,11 @@ function init(){
 			//Users login
 			login: '',
 			//Users positon
-			position: ''
+			position: '',
+			//Results from faculty pressing view roster button, array of objects containing university_id, first_name, last_name
+			viewRosterResults: [],
+			//Holds the crn that has been requested to view the roster of
+			viewRegCRN: ''
 		}
 	});
 	
@@ -261,6 +265,24 @@ function register(crn){
 	
 }
 
+//Function sends a post request to the server when a faculty selects the view roster button
+function viewRoster(crn){
+	vApp.viewRegCRN = crn;
+	var settings = {
+				"async": true,
+				"crossDomain": true,
+				"url": "/roster/"+crn,
+				"method": "POST"
+			   }
+			   
+	$.ajax(settings).done(function (response) {
+			vApp.viewRosterResults = response;
+			//console.log(vApp.viewRosterResults);
+			
+	});
+	
+	
+}
 //Function calculates the amount of registered students to display in the search table
 function getRegCount(list,capacity){
 	

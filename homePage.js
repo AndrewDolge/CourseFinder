@@ -209,6 +209,35 @@ app.post('/search/:nconst', (req, res) => {
 	
 });
 
+//Called when faculty selects the view roster button
+app.post('/roster/:rconst', (req, res) => {
+	//rconst is the crn of the section roster the faculty wishes to view
+	var crn = req.params.rconst;
+	crn = parseInt(crn);
+	
+	//1. Grab the list of all university id's registered in the section
+	ust_db.all("SELECT Sections.registered FROM Sections WHERE crn == ?",crn, (err, rows) => {
+		//List of registered student ids
+		var reg = '';
+		if (err) {
+			console.log('Error running query');
+		}
+		else {	
+			reg = rows[0].registered;
+			reg = '(' + reg + ')';
+			
+			//For each university id registered, grab their first and last name, and send all information back to client side 
+			ust_db.all("SELECT People.university_id, People.first_name, People.last_name FROM People WHERE university_id IN"+reg, (err, rows2) => {
+				
+				res.send(rows2);
+				
+			}) //ust_db.all(Select People.university_id)
+		}
+		
+	}) //ust_db.all Select 	
+
+}) //app.post(/roster/:rconst)
+
 //This post to the server is called when a student clicks on the register course button
 app.post('/register/:rconst', (req, res) => {
 	//True if user has previously registered for a specific course, otherwise false
@@ -420,7 +449,6 @@ function searchWithText(res,subsForSQL,crnNum,courseNum){
 	else{
 		crnNum = parseInt(crnNum);
 	}
-	
 	
 	//Did a user search a course number 
 	if(courseNum.length < 1){
