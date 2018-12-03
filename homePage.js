@@ -408,13 +408,19 @@ function searchWithText(res,subsForSQL,crnNum,courseNum){
 	var isCRN = true;
 	var isCourseNum = true;
 	
-	//Did a user search a crn 
-	if(crnNum.length < 1){
+	if(crnNum == undefined){
 		isCRN = false;
+	}
+	//Did a user search a crn 
+	if(crnNum !== undefined){
+		if(crnNum.length < 1){
+			isCRN = false;
+		}
 	}
 	else{
 		crnNum = parseInt(crnNum);
 	}
+	
 	
 	//Did a user search a course number 
 	if(courseNum.length < 1){
