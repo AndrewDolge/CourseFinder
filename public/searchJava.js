@@ -29,7 +29,7 @@ function init(){
 	//Call to getPosition function to get request the position of the user 
 	//Gets all of the users data from the SQL people table, do this once after login or after each search?
 	getPosition();
-	//console.log(login);
+	
 	
 }
 
@@ -43,7 +43,6 @@ function getDepts(){
 	}
 	$.ajax(settings).done(function (response) {
 		vApp.departments = response;
-		console.log(response);
 	});
 }
 
@@ -52,11 +51,10 @@ function modSubject(){
 	//document.getElementsByClassName("subSelect")style.display = "none";
 }
 
-//hello there
 function reveal(crn, times){
-	console.log("subject"+crn);
+	//console.log("subject"+crn);
 	var x = document.getElementById(crn).style;//.display = 'table-row';
-	console.log(x);
+	//console.log(x);
 	if(x.display == 'none'){
 		x.display = 'table-row';
 	}
@@ -67,10 +65,10 @@ function reveal(crn, times){
 }
 
 function loadthis(y,z){
-	console.log('here');
+	//console.log('here');
 	var times = '';
 	var x = JSON.parse(z);
-	console.log(x.T);
+	//console.log(x.T);
 	if(x.M != null){
 		times += "M " +x.M;
 	}
@@ -177,9 +175,10 @@ function fillTable(){
 						crn = response[i].crn;
 						time = response[i].times;
 						des = response[i].description;
-						reg = response[i].registered;
+						
 						cap = response[i].capacity;
-						wait = 'Placeholder' //will have to manually calculate
+						reg = getRegCount(response[i].registered,cap);
+						wait = getWaitCount(response[i].registered,cap); //will have to manually calculate, something like if registered > capacity
 						
 						vApp.searchResults.push({
 							subject: sub,
@@ -200,7 +199,7 @@ function fillTable(){
 					} //for(i = 0; i < response.length; i++)
 					
 					
-					console.log(response);
+					//console.log(response);
 					
 				
 				}) //ajax(settings)
@@ -224,7 +223,7 @@ function getLogin(){
 
 //function gets the position (student or faculty) and stores it in our vApp
 function getPosition(){
-	console.log(vApp.login);
+	//console.log(vApp.login);
 	var info = {
 				"async": true,
 				"crossDomain": true,
@@ -234,14 +233,69 @@ function getPosition(){
 			   
 	$.ajax(info).done(function (response) {
 			
-			console.log(response);
+			//console.log(response);
 			vApp.position = response[0].position;
-			console.log(vApp.position);
-		
+			//console.log(vApp.position);
 		
 	});
 	
 
+}
+
+//Function sends a post request to homePage when a student registers for a class
+function register(crn){
+	var urlString = '';
+	urlString = vApp.login+'+'+crn
+	var settings = {
+				"async": true,
+				"crossDomain": true,
+				"url": "/register/"+urlString,
+				"method": "POST"
+			   }
+			   
+	$.ajax(settings).done(function (response) {
+			
+			console.log(response);
+		
+	});
+	
+}
+
+//Function calculates the amount of registered students to display in the search table
+function getRegCount(list,capacity){
+	
+	if(list === null){
+		return 0;
+		
+	}
+	
+	else{
+		list = list.split(',');
+		if(list.length > capacity){
+			return capacity;
+		}
+		return list.length;
+	}
+	
+	
+	
+}
+
+//Function calculates the amount of waitlisted students to display in the search table
+function getWaitCount(list,capacity){
+	if(list === null){
+		return 0;
+		
+	}
+	
+	else{
+		list = list.split(',');
+		if(list.length > capacity){
+			return list.length - capacity;
+		}
+		return 0;
+	}
+	
 }
 
 

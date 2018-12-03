@@ -8,7 +8,7 @@ var multiparty = require('multiparty');
 var app = express(); 
 var mime = require('mime-types');
 
-var port = 8006;
+var port = 8014;
 var public_dir = path.join(__dirname, 'public'); 
 
 //Connection to our database
@@ -209,6 +209,87 @@ app.post('/search/:nconst', (req, res) => {
 	
 });
 
+//This post to the server is called when a student clicks on the register course button
+app.post('/register/:rconst', (req, res) => {
+	//True if user has previously registered for a specific course, otherwise false
+	var isPreviousReg = '';
+	//Stores the previous string of comma separated student ids registered
+	var previous = '';
+	//The login of the user attempting to register
+	var login = '';
+	//The section CRN the student is attempting to register for 
+	var course_reg = '';
+	//Components contains a string of login and crn separated with a +
+	var components = req.params.rconst;
+	
+	//Split out and store the login and CRN information
+	components = components.split('+');
+	login = components[0];
+	course_reg = parseInt(components[1]);
+
+	//First grab the students database file from the People table 
+	ust_db.all("Select People.registered_courses From People where university_id == ?",login, (err, rows1) => {
+		
+		//Call function previousReg and determine if the student has already registered for this course 
+		isPreviousReg = previousReg(rows1[0].registered_courses, course_reg);
+		
+		//Only if the student has not previously registered for the course 
+		if(isPreviousReg === false){
+			//Grab the registered list of student ids and capacity of the class for the course to be registered for 
+			ust_db.all("Select Sections.registered, Sections.capacity From Sections where crn == ?",course_reg, (err, rows) => {
+						var capacity = rows[0].capacity;
+						var toBeWaitlisted = false;	
+						//Call isWaitlist to determine if the student should be added to the waitlist for the course 
+						toBeWaitlisted = isWaitlist(rows[0].registered, capacity)
+						
+						if (err) {
+							console.log('Error running query');
+						}
+						
+						else {	
+							//If no other student has previously registered for this course 
+							if(rows[0].registered === null){
+								ust_db.run("UPDATE Sections SET registered = \""+login+"\" WHERE Sections.crn == ?", course_reg, (err, rows) => {
+											if (err) {
+												console.log('Error running query');
+											}
+											else {	
+												res.send('Successful register');
+											}
+								})
+							}
+							//If other students have registered for this course, grab the previous registered list and add our current id
+							else{
+								previous = rows[0].registered;
+								
+								previous += ',' + login;
+								
+								ust_db.run("UPDATE Sections SET registered = \""+previous+"\" WHERE Sections.crn == ?", course_reg, (err, rows) => {
+											if (err) {
+												console.log('Error running query');
+											}
+											else {	
+												res.send('Successful register');
+											}
+								});
+								
+							}//else
+							
+							//Finally call the insertCRN function to insert the CRN of the course being registered in the registered_courses field for the student in the People table
+							insertCRN(login,course_reg,toBeWaitlisted);
+							
+						}//else
+					}); //ust_db.all Select Sections.registered
+		} //if(PreviousReg)
+		else{
+			
+			res.send('Error already registered');
+			
+		}
+	}); //ust_db.all Select People.registered_courses
+}); //app.post('/register/:rconst')
+
+
 //Get request is executed after login in to store the users personal database information
 app.get('/position/:pconst', (req, res) => {
 	var login = req.params.pconst
@@ -400,3 +481,91 @@ function searchWithText(res,subsForSQL,crnNum,courseNum){
 		
 	}
 }
+
+//Called by app.post(register), used to check if a student has previously registered for a certain course 
+//List is a comma seperated list of all CRNS a student is registered for, curCRN is the current CRN a student is attempting to register for 
+//Returns false if not previously registered and true if previously registerd 
+function previousReg(list, curCRN){
+	var i;
+	if(list === null){
+		return false;
+	}
+
+	list = list.split(',');
+	
+	for(i=0; i < list.length; i++){
+		if(list[i][0] === 'W'){
+			list[i] = list[i].slice(1);
+		}
+		
+		if(list[i] == curCRN){
+			return true;
+		}
+	}
+	
+	return false;
+
+}
+//Function isWaitlist takes a list of currently registered student ids for a course and the capacity of a course
+//If the students registered for the course is equal to or greater than capacity return true to add the student to the waitlist for the course 
+function isWaitlist(regList, capacity){
+	if(regList === null){
+		return false;
+	}
+	else{	
+		regList = regList.split(',');
+		if(regList.length >= capacity){
+			return true;
+		}
+		return false;
+	}	
+}
+
+/*Function insertCRN is used to insert the CRN of a registered course into the registered_courses field of a students data in the SQL People table
+  login is the university_id of the student, course_reg is the Section CRN to be registered for, waitlisted is a boolean representing if a student needs
+  to be waitlisted for the course*/
+function insertCRN(login, course_reg, waitlisted){
+	
+	ust_db.all("Select People.registered_courses From People where university_id == ?",login, (err, rows) => {
+			if (err) {
+				console.log('Error running query');
+			}
+			else {	
+				//If student has not yet registered for any courses
+				if(rows[0].registered_courses === null){
+					//If student should be waitlisted for the course 
+					if(waitlisted === true){
+						course_reg = 'W' + course_reg;
+						
+					}
+					
+					ust_db.run("UPDATE People SET registered_courses = \""+course_reg+"\" WHERE university_id == ?", login);
+				
+				}
+				else{
+					//If user has already registered for courses, grab previous list and add new section CRN 
+					previous = rows[0].registered_courses;
+					
+					if(waitlisted === true){
+						course_reg = 'W' + course_reg;
+						
+					}
+					
+					previous += ',' + course_reg;
+					
+					ust_db.run("UPDATE People SET registered_courses = \""+previous+"\" WHERE university_id == ?", login, (err, rows) => {
+								if (err) {
+									console.log('Error running query');
+								}
+								else {	
+								
+								}
+					});
+					
+				}//else
+				
+				
+			}//else
+	}); //ust_db.all Select Sections.registered
+	
+} //function insertCRN

@@ -57,7 +57,7 @@
 							<th> Waitlist </th>
 						</tr>
 				</table>-->
-					<table v-for="item in searchResults" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
+				<table v-for="item in searchResults" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
 					<!--<tr style="display: 'none';">
 							<th style="display: 'none';"> Subject </th>
 							<th style="display: 'none';"> Course Number </th>
@@ -105,10 +105,15 @@
 						<td style="width: 300px;">
 							{{item.description}}
 						</td>
-						<td v-bind:id="item.CRN+'time'">
+							<td v-bind:id="item.CRN+'time'">
 						</td>
+						
+						<!-- Register / View Roster buttons depending on position of the user -->
+						<td> <span v-if="position === 'student'">  <button type="button" v-on:click="register(item.CRN)">Register</button> </span> </td>
+						<td> <span v-if="position === 'faculty'"> <button type="button" onclick="console.log('hello')">View Roster</button> </span> </td>
+						
 					</tr>
-					</table>	
+				</table>	
 					
 			</div>
 		</div>	
