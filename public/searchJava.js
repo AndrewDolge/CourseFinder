@@ -35,6 +35,13 @@ function init(){
 	getPosition();
 	
 	
+	//These are used to create a loading animation for each time data is requested from a server, and to end that animation when data is received 
+	$( document ).ajaxStart(function() {
+			NProgress.start();
+	});
+	$( document ).ajaxStop(function() {
+			NProgress.done();
+	});
 }
 
 //gets the subject and full name for each department from our SQL departments table, used for filling our template of checkboxes
@@ -121,7 +128,7 @@ function fillTable(){
 			var atLeastOneChecked = false;
 			
 			//Used to start loading animation when searching for a table 
-			NProgress.start();
+			//NProgress.start();
 			
 			//Builds up our url based on checked subjects
 			//Adds a '-' for parsing by the server 
@@ -207,14 +214,11 @@ function fillTable(){
 					
 					//console.log(response);
 					
-					//Used to complete loading animation when request is complete 
-					NProgress.done();
 					
 				}) //ajax(settings)
 			} //if(atLeastOneChecked)
 			else{
-				//Used to complete the loading animation on no selected subjects 
-				NProgress.done();
+				
 				console.log("Must select at least one subject");
 
 			}
@@ -242,7 +246,6 @@ function getPosition(){
 			   }
 			   
 	$.ajax(info).done(function (response) {
-			
 			//console.log(response);
 			vApp.position = response[0].position;
 			//console.log(vApp.position);
