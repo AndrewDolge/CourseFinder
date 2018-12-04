@@ -288,7 +288,12 @@ app.post('/register/:rconst', (req, res) => {
 												console.log('Error running query');
 											}
 											else {	
-												res.send('Successful register');
+												if(toBeWaitlisted === false){
+													res.send('R');
+												}
+												else if(toBeWaitlisted === true){
+														res.send('W');
+												}
 											}
 								})
 							}
@@ -303,7 +308,12 @@ app.post('/register/:rconst', (req, res) => {
 												console.log('Error running query');
 											}
 											else {	
-												res.send('Successful register');
+												if(toBeWaitlisted === false){
+													res.send('R');
+												}
+												else if(toBeWaitlisted === true){
+														res.send('W');
+												}
 											}
 								});
 								

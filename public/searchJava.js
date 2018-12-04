@@ -336,7 +336,25 @@ function register(crn){
 			   }
 			   
 	$.ajax(settings).done(function (response) {
+			if(response === 'R'){
+				var i;
+				for(i=0; i < vApp.searchResults.length; i++){
+					if(crn == vApp.searchResults[i].CRN){
+						vApp.searchResults[i].registered = vApp.searchResults[i].registered +1;	
+					}
+					
+				}
+			}
 			
+			if(response === 'W'){
+				var i;
+				for(i=0; i < vApp.searchResults.length; i++){
+					if(crn == vApp.searchResults[i].CRN){
+						vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist +1;	
+					}
+					
+				}
+			}
 			console.log(response);
 		
 	});
