@@ -20,7 +20,23 @@ function init(){
 			viewRosterResults: [],
 			//Holds the crn that has been requested to view the roster of
 			viewRegCRN: '',
-			registeredCourses = ''
+			registeredCourses: []
+		},
+		watch: {
+			searchResults: function(value){
+				this.$nextTick(()=>{
+					var i;
+					var x;
+					for(i=0;i<vApp.registeredCourses.length; i++){
+						
+						x = document.getElementById(vApp.registeredCourses[i] + 'color');
+						console.log(x);
+						if(x != null){
+							x.style.backgroundColor = '#45e86e';
+						}
+					}
+				});
+			}
 		}
 	});
 	
@@ -247,7 +263,8 @@ function getPosition(){
 			   }
 			   
 	$.ajax(info).done(function (response) {
-			vApp.registeredCourses = response[0].registered_courses;
+		console.log(response);
+			vApp.registeredCourses = response[0].registered_courses.split(',');
 			vApp.position = response[0].position;
 			//console.log(vApp.position);
 		
@@ -276,12 +293,13 @@ function register(crn){
 }
 
 function getColor(crn){
+	console.log("in getcolor");
 	var x = vApp.registeredCourses;
 	var y = x.split(',');
 	var i;
 	for(i=0;i<y.length;i++){
 		if(crn == y[i]){
-			document.getElementById(crn+'color').style.background-color = #45e86e;
+			document.getElementById(crn+'color').style.backgroundColor = '#45e86e';
 		}
 	}
 }
