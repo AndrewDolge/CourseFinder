@@ -20,8 +20,10 @@ function init(){
 			viewRosterResults: [],
 			//Holds the crn that has been requested to view the roster of
 			viewRegCRN: '',
+			//An array list of the users registered courses to be used for coloring section rows
 			registeredCourses: []
 		},
+		//Watchers for when searchResults or registeredCourses arrays change in order to change color 
 		watch: {
 			searchResults: function(value){
 				this.$nextTick(()=>{
@@ -68,6 +70,7 @@ function init(){
 					}
 			}
 		}, //watch
+		//Computed search tables  function used to set checkboxes in columns of 3
 		computed: {
 			//Adjust for remainder total of 94 subjects , ask what problem is 
 			searchTables: function(){
@@ -95,7 +98,6 @@ function init(){
 	
 	document.getElementsByClassName("hideInfo").display = "none";
 	getDepts();
-	modSubject();
 	
 	//Call to getLogin to parse the HTML containing the users id
 	vApp.login = getLogin();
@@ -142,11 +144,6 @@ function getDepts(){
 	$.ajax(settings).done(function (response) {
 		vApp.departments = response;
 	});
-}
-
-//Function in process
-function modSubject(){
-	//document.getElementsByClassName("subSelect")style.display = "none";
 }
 
 function reveal(crn, times){
@@ -334,11 +331,13 @@ function getPosition(){
 			   
 	$.ajax(info).done(function (response) {
 		console.log(response);
+			//Obtain the users registered courses data and set it in the Vue App
 			if(response[0].registered_courses !== null){
 				vApp.registeredCourses = response[0].registered_courses.split(',');
 			}
+			//Set the position of the user in the Vue app
 			vApp.position = response[0].position;
-			//console.log(vApp.position);
+		
 		
 	});
 	
@@ -357,6 +356,7 @@ function register(crn){
 			   }
 			   
 	$.ajax(settings).done(function (response) {
+			//If student is clear to register push the crn to the registeredCourses array to change the color and increase the count 
 			if(response === 'R'){
 				var i;
 				for(i=0; i < vApp.searchResults.length; i++){
@@ -367,7 +367,7 @@ function register(crn){
 					
 				}
 			}
-			
+			//If student is on the waitlist push the crn with a W to the registeredCourses array to change the color and increase the count 
 			if(response === 'W'){
 				var i;
 				for(i=0; i < vApp.searchResults.length; i++){
