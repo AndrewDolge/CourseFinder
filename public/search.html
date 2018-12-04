@@ -38,17 +38,16 @@
 
 
 		<div id="app">
-			<h1>This is the search page</h1>
-			
+			<button type="button" onclick="showSub()">Choose a Subject, neato!</button>
 			<!-- Course checkboxes -->
 			<div id="subjects">
-				<table id="list" style= "list-style: none">
+				<table id="list" style= "display: none;">
 					<tr class="dontsplit" v-for="row in searchTables">
 						<td v-for="item in row"><input v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
 					</tr>
 				</table>	
 			</div>
-			
+			<br/>
 			<!--Course Number and CRN search boxes-->
 			<div id='searchBoxes'>
 			

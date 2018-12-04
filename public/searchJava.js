@@ -93,6 +93,17 @@ function init(){
 	});
 }
 
+function showSub(){
+	console.log("here");
+	var x = document.getElementById("list");
+	if (x.style.display !== "block"){
+		x.style.display = "block";
+	}else{
+		x.style.display = "none";
+	}
+	console.log(x);
+}
+
 //gets the subject and full name for each department from our SQL departments table, used for filling our template of checkboxes
 function getDepts(){
 	var settings = {
