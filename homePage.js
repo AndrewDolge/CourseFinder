@@ -7,8 +7,9 @@ var sqlite3 = require('sqlite3');
 var multiparty = require('multiparty');
 var app = express(); 
 var mime = require('mime-types');
+var md5  = require('./md5.min')
 
-var port = 8014;
+var port = 8006;
 var public_dir = path.join(__dirname, 'public'); 
 
 //Connection to our database
@@ -54,7 +55,10 @@ app.post('/login' , (req, res) => {
     form.parse(req, (err, fields, files) => {
 		
 		login = fields.login;
-		pass = fields.passwd;
+		//TODO: Salt the password
+		pass = md5(fields.passwd);
+
+		
 		
 		
 		//If login is empty or not a number 
@@ -109,7 +113,8 @@ app.post('/new', (req, res) => {
     form.parse(req, (err, fields, files) => {
 		
 		login = fields.login;
-		pass = fields.passwd;
+		//TODO salt the password
+		pass = md5(fields.passwd);
 		position = fields.position;
 		first = fields.firstName;
 		last = fields.lastName;
@@ -603,3 +608,4 @@ function insertCRN(login, course_reg, waitlisted){
 	}); //ust_db.all Select Sections.registered
 	
 } //function insertCRN
+
