@@ -119,7 +119,9 @@ function fillTable(){
 			var index;
 			var urlString = ''
 			var atLeastOneChecked = false;
-		
+			
+			//Used to start loading animation when searching for a table 
+			NProgress.start();
 			
 			//Builds up our url based on checked subjects
 			//Adds a '-' for parsing by the server 
@@ -205,10 +207,14 @@ function fillTable(){
 					
 					//console.log(response);
 					
-				
+					//Used to complete loading animation when request is complete 
+					NProgress.done();
+					
 				}) //ajax(settings)
 			} //if(atLeastOneChecked)
 			else{
+				//Used to complete the loading animation on no selected subjects 
+				NProgress.done();
 				console.log("Must select at least one subject");
 
 			}

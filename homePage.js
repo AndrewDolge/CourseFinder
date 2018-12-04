@@ -9,7 +9,7 @@ var app = express();
 var mime = require('mime-types');
 var md5  = require('./md5.min')
 
-var port = 8006;
+var port = 8014;
 var public_dir = path.join(__dirname, 'public'); 
 
 //Connection to our database
