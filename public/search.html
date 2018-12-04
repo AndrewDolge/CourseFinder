@@ -43,8 +43,8 @@
 			<!-- Course checkboxes -->
 			<div id="subjects">
 				<table id="list" style= "list-style: none">
-					<tr class="dontsplit" v-for="item in departments">
-						<td><input   v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
+					<tr class="dontsplit" v-for="row in searchTables">
+						<td v-for="item in row"><input v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
 					</tr>
 				</table>	
 			</div>

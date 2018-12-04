@@ -37,7 +37,30 @@ function init(){
 					}
 				});
 			}
-		}
+		}, //watch
+		computed: {
+			//Adjust for remainder total of 94 subjects , ask what problem is 
+			searchTables: function(){
+				var result = [];
+				var row;
+				var i;
+				var col = 0;
+				for(i = 0; i < this.departments.length; i++){
+					if (col === 0) {
+						row = [];
+						result.push(row);
+					}
+					
+					row.push(this.departments[i]);
+					
+					col = (col + 1) % 3
+				}
+				
+				console.log(result);
+				return result;
+			}
+			
+		} //computed
 	});
 	
 	document.getElementsByClassName("hideInfo").display = "none";
@@ -264,7 +287,9 @@ function getPosition(){
 			   
 	$.ajax(info).done(function (response) {
 		console.log(response);
-			vApp.registeredCourses = response[0].registered_courses.split(',');
+			if(response[0].registered_courses !== null){
+				vApp.registeredCourses = response[0].registered_courses.split(',');
+			}
 			vApp.position = response[0].position;
 			//console.log(vApp.position);
 		
