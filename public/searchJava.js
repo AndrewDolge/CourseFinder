@@ -45,6 +45,27 @@ function init(){
 						}
 					}
 				});
+			},
+			registeredCourses: function(value){
+					var i;
+					var x;
+					for(i=0;i<vApp.searchResults.length; i++){
+						x = document.getElementById(vApp.searchResults[i].CRN + 'color').style.backgroundColor = '#d1d3d2';
+					}
+					for(i=0;i<vApp.registeredCourses.length; i++){
+						x = document.getElementById(vApp.registeredCourses[i] + 'color');
+						console.log(x);
+						if(x != null){
+							x.style.backgroundColor = '#45e86e';
+						}
+						else{
+							var y = vApp.registeredCourses[i].substring(1,vApp.registeredCourses[i].length);
+							x = document.getElementById(y + 'color');
+							if(x != null){
+								x.style.backgroundColor = '#e6ed87';
+							}
+						}
+					}
 			}
 		}, //watch
 		computed: {
@@ -341,6 +362,7 @@ function register(crn){
 				for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
 						vApp.searchResults[i].registered = vApp.searchResults[i].registered +1;	
+						vApp.registeredCourses.push(crn);
 					}
 					
 				}
@@ -351,6 +373,7 @@ function register(crn){
 				for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
 						vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist +1;	
+						vApp.registeredCourses.push("W" + crn);
 					}
 					
 				}
