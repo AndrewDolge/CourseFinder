@@ -19,13 +19,85 @@ function init(){
 			//Results from faculty pressing view roster button, array of objects containing university_id, first_name, last_name
 			viewRosterResults: [],
 			//Holds the crn that has been requested to view the roster of
-			viewRegCRN: ''
-		}
+			viewRegCRN: '',
+			//An array list of the users registered courses to be used for coloring section rows
+			registeredCourses: []
+		},
+		//Watchers for when searchResults or registeredCourses arrays change in order to change color 
+		watch: {
+			searchResults: function(value){
+				this.$nextTick(()=>{
+					var i;
+					var x;
+					for(i=0;i<vApp.searchResults.length; i++){
+						x = document.getElementById(vApp.searchResults[i].CRN + 'color').style.backgroundColor = '#d1d3d2';
+					}
+					for(i=0;i<vApp.registeredCourses.length; i++){
+						x = document.getElementById(vApp.registeredCourses[i] + 'color');
+						console.log(x);
+						if(x != null){
+							x.style.backgroundColor = '#45e86e';
+						}
+						else{
+							var y = vApp.registeredCourses[i].substring(1,vApp.registeredCourses[i].length);
+							x = document.getElementById(y + 'color');
+							if(x != null){
+								x.style.backgroundColor = '#e6ed87';
+							}
+						}
+					}
+				});
+			},
+			registeredCourses: function(value){
+					var i;
+					var x;
+					for(i=0;i<vApp.searchResults.length; i++){
+						x = document.getElementById(vApp.searchResults[i].CRN + 'color').style.backgroundColor = '#d1d3d2';
+					}
+					for(i=0;i<vApp.registeredCourses.length; i++){
+						x = document.getElementById(vApp.registeredCourses[i] + 'color');
+						console.log(x);
+						if(x != null){
+							x.style.backgroundColor = '#45e86e';
+						}
+						else{
+							var y = vApp.registeredCourses[i].substring(1,vApp.registeredCourses[i].length);
+							x = document.getElementById(y + 'color');
+							if(x != null){
+								x.style.backgroundColor = '#e6ed87';
+							}
+						}
+					}
+			}
+		}, //watch
+		//Computed search tables  function used to set checkboxes in columns of 3
+		computed: {
+			//Adjust for remainder total of 94 subjects , ask what problem is 
+			searchTables: function(){
+				var result = [];
+				var row;
+				var i;
+				var col = 0;
+				for(i = 0; i < this.departments.length; i++){
+					if (col === 0) {
+						row = [];
+						result.push(row);
+					}
+					
+					row.push(this.departments[i]);
+					
+					col = (col + 1) % 3
+				}
+				
+				console.log(result);
+				return result;
+			}
+			
+		} //computed
 	});
 	
 	document.getElementsByClassName("hideInfo").display = "none";
 	getDepts();
-	modSubject();
 	
 	//Call to getLogin to parse the HTML containing the users id
 	vApp.login = getLogin();
@@ -35,6 +107,30 @@ function init(){
 	getPosition();
 	
 	
+	//These are used to create a loading animation for each time data is requested from a server, and to end that animation when data is received 
+	$( document ).ajaxStart(function() {
+			NProgress.start();
+	});
+	$( document ).ajaxStop(function() {
+			NProgress.done();
+	});
+}
+
+function showSub(){
+	var x = document.getElementById("list");
+	if (x.style.display !== "block"){
+		x.style.display = "block";
+	}else{
+		x.style.display = "none";
+	}
+	var y = document.getElementById("code");
+	if(y.innerHTML == '+'){
+		y.innerHTML = '-';
+	}else{
+		y.innerHTML = '+';
+	}
+	console.log(y.innerHTML);
+	console.log(x);
 }
 
 //gets the subject and full name for each department from our SQL departments table, used for filling our template of checkboxes
@@ -48,11 +144,6 @@ function getDepts(){
 	$.ajax(settings).done(function (response) {
 		vApp.departments = response;
 	});
-}
-
-//Function in process
-function modSubject(){
-	//document.getElementsByClassName("subSelect")style.display = "none";
 }
 
 function reveal(crn, times){
@@ -119,7 +210,9 @@ function fillTable(){
 			var index;
 			var urlString = ''
 			var atLeastOneChecked = false;
-		
+			
+			//Used to start loading animation when searching for a table 
+			//NProgress.start();
 			
 			//Builds up our url based on checked subjects
 			//Adds a '-' for parsing by the server 
@@ -205,10 +298,11 @@ function fillTable(){
 					
 					//console.log(response);
 					
-				
+					
 				}) //ajax(settings)
 			} //if(atLeastOneChecked)
 			else{
+				
 				console.log("Must select at least one subject");
 
 			}
@@ -236,10 +330,14 @@ function getPosition(){
 			   }
 			   
 	$.ajax(info).done(function (response) {
-			
-			//console.log(response);
+		console.log(response);
+			//Obtain the users registered courses data and set it in the Vue App
+			if(response[0].registered_courses !== null){
+				vApp.registeredCourses = response[0].registered_courses.split(',');
+			}
+			//Set the position of the user in the Vue app
 			vApp.position = response[0].position;
-			//console.log(vApp.position);
+		
 		
 	});
 	
@@ -258,11 +356,44 @@ function register(crn){
 			   }
 			   
 	$.ajax(settings).done(function (response) {
-			
+			//If student is clear to register push the crn to the registeredCourses array to change the color and increase the count 
+			if(response === 'R'){
+				var i;
+				for(i=0; i < vApp.searchResults.length; i++){
+					if(crn == vApp.searchResults[i].CRN){
+						vApp.searchResults[i].registered = vApp.searchResults[i].registered +1;	
+						vApp.registeredCourses.push(crn);
+					}
+					
+				}
+			}
+			//If student is on the waitlist push the crn with a W to the registeredCourses array to change the color and increase the count 
+			if(response === 'W'){
+				var i;
+				for(i=0; i < vApp.searchResults.length; i++){
+					if(crn == vApp.searchResults[i].CRN){
+						vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist +1;	
+						vApp.registeredCourses.push("W" + crn);
+					}
+					
+				}
+			}
 			console.log(response);
 		
 	});
 	
+}
+
+function getColor(crn){
+	console.log("in getcolor");
+	var x = vApp.registeredCourses;
+	var y = x.split(',');
+	var i;
+	for(i=0;i<y.length;i++){
+		if(crn == y[i]){
+			document.getElementById(crn+'color').style.backgroundColor = '#45e86e';
+		}
+	}
 }
 
 //Function sends a post request to the server when a faculty selects the view roster button

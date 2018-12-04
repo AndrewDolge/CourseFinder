@@ -16,13 +16,16 @@
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 		<link rel="stylesheet" href="navbar.css">
-	<!--JavaScript for Bootstrap-->
-  	<!--Popper.js-->
+		
+		<!--JavaScript for Bootstrap-->
+		<!--Popper.js-->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 		<!--booststrap.js-->
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
-
+		<!--Package for loading animation-->
+		<link href="https://unpkg.com/nprogress@0.2.0/nprogress.css" rel="stylesheet" />
+		<script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
 		
 	</head>
 
@@ -35,17 +38,25 @@
 
 
 		<div id="app">
-			<h1>This is the search page</h1>
-			
+			<table  style="border-width: 1px; border-color: black; border: solid; margin: 10px;" >
+				<tr>
+					<td style="width:40px; font-size: 20px; background-color: #d1d3d2" onMouseOver="this.style.cursor='pointer'" onclick="showSub()">
+						<center id="code">&#43;</center>
+					</td>
+					<td>
+						Choose a Subject
+					</td>
+				</tr>
+			</table>
 			<!-- Course checkboxes -->
 			<div id="subjects">
-				<table id="list" style= "list-style: none">
-					<tr class="dontsplit" v-for="item in departments">
-						<td><input   v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
+				<table id="list" style= "display: none;">
+					<tr class="dontsplit" v-for="row in searchTables">
+						<td v-for="item in row"><input v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
 					</tr>
 				</table>	
 			</div>
-			
+			<br/>
 			<!--Course Number and CRN search boxes-->
 			<div id='searchBoxes'>
 			
@@ -58,36 +69,11 @@
 			
 			<!--Search Button used for filling table-->
 			<button type="button" onclick="checkStatus()">Search</button>
-			
+			<!-- v-bind:id="item.CRN + 'color'"  -->
 		<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
 			<div id="results">
-				<!--<table id="realTable" style="border-width: 1px; border-color: black; border: solid;">
-						<tr>
-							<th> Subject </th>
-							<th> Course Number </th>
-							<th> Section </th>
-							<th> Name </th>
-							<th> Building / Room </th>
-							<th> Professor </th>
-							<th> Credits </th>
-							<th> CRN </th>
-							<th> Amount Registered / Capacity </th>
-							<th> Waitlist </th>
-						</tr>
-				</table>-->
-				<table v-for="item in searchResults" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
-					<!--<tr style="display: 'none';">
-							<th style="display: 'none';"> Subject </th>
-							<th style="display: 'none';"> Course Number </th>
-							<th style="display: 'none';"> Section </th>
-							<th style="display: 'none';"> Name </th>
-							<th style="display: 'none';"> Building / Room </th>
-							<th style="display: 'none';"> Professor </th>
-							<th style="display: 'none';"> Credits </th>
-							<th style="display: 'none';"> CRN </th>
-							<th style="display: 'none';"> Amount Registered / Capacity </th>
-							<th style="display: 'none';"> Waitlist </th>
-						</tr>-->
+				<table v-for="item in searchResults" v-bind:id="item.CRN + 'color'"  style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
+			
 					<tr  v-on:click="reveal(item.CRN,item.times)" onMouseOver="this.style.cursor='pointer'">
 						<td class="tableData" style="width:75px;">
 							<center> {{item.subject}} </center>

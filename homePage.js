@@ -9,7 +9,7 @@ var app = express();
 var mime = require('mime-types');
 var md5  = require('./md5.min')
 
-var port = 8006;
+var port = 8014;
 var public_dir = path.join(__dirname, 'public'); 
 
 //Connection to our database
@@ -288,7 +288,12 @@ app.post('/register/:rconst', (req, res) => {
 												console.log('Error running query');
 											}
 											else {	
-												res.send('Successful register');
+												if(toBeWaitlisted === false){
+													res.send('R');
+												}
+												else if(toBeWaitlisted === true){
+														res.send('W');
+												}
 											}
 								})
 							}
@@ -303,7 +308,12 @@ app.post('/register/:rconst', (req, res) => {
 												console.log('Error running query');
 											}
 											else {	
-												res.send('Successful register');
+												if(toBeWaitlisted === false){
+													res.send('R');
+												}
+												else if(toBeWaitlisted === true){
+														res.send('W');
+												}
 											}
 								});
 								
