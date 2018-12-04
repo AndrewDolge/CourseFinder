@@ -64,33 +64,8 @@
 			
 		<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
 			<div id="results">
-				<!--<table id="realTable" style="border-width: 1px; border-color: black; border: solid;">
-						<tr>
-							<th> Subject </th>
-							<th> Course Number </th>
-							<th> Section </th>
-							<th> Name </th>
-							<th> Building / Room </th>
-							<th> Professor </th>
-							<th> Credits </th>
-							<th> CRN </th>
-							<th> Amount Registered / Capacity </th>
-							<th> Waitlist </th>
-						</tr>
-				</table>-->
-				<table v-for="item in searchResults" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
-					<!--<tr style="display: 'none';">
-							<th style="display: 'none';"> Subject </th>
-							<th style="display: 'none';"> Course Number </th>
-							<th style="display: 'none';"> Section </th>
-							<th style="display: 'none';"> Name </th>
-							<th style="display: 'none';"> Building / Room </th>
-							<th style="display: 'none';"> Professor </th>
-							<th style="display: 'none';"> Credits </th>
-							<th style="display: 'none';"> CRN </th>
-							<th style="display: 'none';"> Amount Registered / Capacity </th>
-							<th style="display: 'none';"> Waitlist </th>
-						</tr>-->
+				<table v-for="item in searchResults" v-bind:id="item.CRN + 'color'" v-on:load="getColor(item.CRN)" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
+			
 					<tr  v-on:click="reveal(item.CRN,item.times)" onMouseOver="this.style.cursor='pointer'">
 						<td class="tableData" style="width:75px;">
 							<center> {{item.subject}} </center>

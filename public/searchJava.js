@@ -19,7 +19,8 @@ function init(){
 			//Results from faculty pressing view roster button, array of objects containing university_id, first_name, last_name
 			viewRosterResults: [],
 			//Holds the crn that has been requested to view the roster of
-			viewRegCRN: ''
+			viewRegCRN: '',
+			registeredCourses = ''
 		}
 	});
 	
@@ -246,7 +247,7 @@ function getPosition(){
 			   }
 			   
 	$.ajax(info).done(function (response) {
-			//console.log(response);
+			vApp.registeredCourses = response[0].registered_courses;
 			vApp.position = response[0].position;
 			//console.log(vApp.position);
 		
@@ -272,6 +273,17 @@ function register(crn){
 		
 	});
 	
+}
+
+function getColor(crn){
+	var x = vApp.registeredCourses;
+	var y = x.split(',');
+	var i;
+	for(i=0;i<y.length;i++){
+		if(crn == y[i]){
+			document.getElementById(crn+'color').style.background-color = #45e86e;
+		}
+	}
 }
 
 //Function sends a post request to the server when a faculty selects the view roster button
