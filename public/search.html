@@ -38,7 +38,16 @@
 
 
 		<div id="app">
-			<button type="button" onclick="showSub()">Choose a Subject, neato!</button>
+			<table onclick="showSub()" style="border-width: 1px; border-color: black; border: solid; margin: 10px;" onMouseOver="this.style.cursor='pointer'">
+				<tr>
+					<td style="width:40px; font-size: 20px; background-color: #d1d3d2">
+						<center id="code">&#43;</center>
+					</td>
+					<td>
+						Choose a Subject
+					</td>
+				</tr>
+			</table>
 			<!-- Course checkboxes -->
 			<div id="subjects">
 				<table id="list" style= "display: none;">

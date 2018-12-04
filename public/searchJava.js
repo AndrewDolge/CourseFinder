@@ -94,13 +94,19 @@ function init(){
 }
 
 function showSub(){
-	console.log("here");
 	var x = document.getElementById("list");
 	if (x.style.display !== "block"){
 		x.style.display = "block";
 	}else{
 		x.style.display = "none";
 	}
+	var y = document.getElementById("code");
+	if(y.innerHTML == '+'){
+		y.innerHTML = '-';
+	}else{
+		y.innerHTML = '+';
+	}
+	console.log(y.innerHTML);
 	console.log(x);
 }
 
