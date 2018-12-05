@@ -2,10 +2,10 @@
 <html>
 	<head>
 		<title> Search Page </title>
-		
+
 		<!-- Stylesheet -->
 		<link rel="stylesheet" href="searchStyle.css">
-		
+
 		<!-- Vue Script -->
 		<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
 		<!-- Our custom Script -->
@@ -16,7 +16,7 @@
 		<!-- Bootstrap CSS -->
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 		<link rel="stylesheet" href="navbar.css">
-		
+
 		<!--JavaScript for Bootstrap-->
 		<!--Popper.js-->
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
@@ -26,14 +26,25 @@
 		<!--Package for loading animation-->
 		<link href="https://unpkg.com/nprogress@0.2.0/nprogress.css" rel="stylesheet" />
 		<script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
-		
+
 	</head>
 
 	<body onload= 'init()'>
 
 		<nav class="navbar">
-				<a class="navbar-brand" href="https://www.stthomas.edu/">St. Thomas</a>
-
+			<!--St Thomas logo header -->
+			<a class="nav-brand st-thomas-logo" href="http://www.stthomas.edu/">
+				University of St. Thomas  EMinnesota  EA private, Catholic liberal arts university
+			</a>
+			<a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+			          Menu
+        	</a>
+			<div class="dropdown-menu dropdown-menu-right">
+				<a class="dropdown-item" href="about.html">About Us</a>
+				<a class="dropdown-item" href="#">Schedule</a>
+			    <div class="dropdown-divider"></div>
+			    	<a class="dropdown-item" href="index.html">Log Out</a>
+       		</div>
 		</nav>
 
 
@@ -54,26 +65,26 @@
 					<tr class="dontsplit" v-for="row in searchTables">
 						<td v-for="item in row"><input v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
 					</tr>
-				</table>	
+				</table>
 			</div>
 			<br/>
 			<!--Course Number and CRN search boxes-->
 			<div id='searchBoxes'>
-			
+
 			<input id="courseSearch" type="text" v-model="courseNumberSearch" placeholder= "Search by course number"> </input>
 			<input id="crnSearch" type="text" v-model="crnNumberSearch" placeholder= "Search by CRN"> </input>
-			
+
 			</div>
-		
-			
-			
+
+
+
 			<!--Search Button used for filling table-->
 			<button type="button" onclick="checkStatus()">Search</button>
 			<!-- v-bind:id="item.CRN + 'color'"  -->
 		<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
 			<div id="results">
-				<table v-for="item in searchResults" v-bind:id="item.CRN + 'color'"  style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
-			
+				<table v-for="item in searchResults" v-bind:id="item.CRN + 'color'" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
+
 					<tr  v-on:click="reveal(item.CRN,item.times)" onMouseOver="this.style.cursor='pointer'">
 						<td class="tableData" style="width:75px;">
 							<center> {{item.subject}} </center>
@@ -85,9 +96,9 @@
 							<center>{{item.course_name}}</center>
 						</td>
 						<td class="tableData" style="width: 150px;">
-							<center>{{item.building}}</center> <center>{{item.room}}</center> 
+							<center>{{item.building}}</center> <center>{{item.room}}</center>
 						</td>
-						
+
 						<td class="tableData">
 							<center> {{item.professors}} </center>
 						</td>
@@ -98,7 +109,7 @@
 							<center>{{item.CRN}}</center>
 						</td>
 						<td class="tableData">
-							<center>{{item.registered}}/{{item.capacity}}</center> 
+							<center>{{item.registered}}/{{item.capacity}}</center>
 						</td>
 						<td class="tableData">
 							<center>{{item.waitlist}}</center>
@@ -111,18 +122,18 @@
 						</td>
 							<td v-bind:id="item.CRN+'time'">
 						</td>
-						
+
 						<!-- Register / View Roster buttons depending on position of the user -->
 						<td> <span v-if="position === 'student'">  <button type="button" v-on:click="register(item.CRN)">Register</button> </span> </td>
 						<td> <span v-if="position === 'faculty'"> <button type="button" v-on:click="viewRoster(item.CRN)">View Roster</button> </span> </td>
 						<!--Displays the the roster of the CRN for a faculty when requested-->
 						<td v-for="stuff in viewRosterResults"> <span v-if="viewRosterResults.length > 0 && item.CRN == viewRegCRN"> {{stuff.university_id}} - {{stuff.first_name}} {{stuff.last_name}} </span> </td>
-						
+
 					</tr>
-				</table>	
-					
+				</table>
+
 			</div>
-		</div>	
+		</div>
 	</body>
 
 
