@@ -68,6 +68,7 @@ function init(){
 							}
 						}
 					}
+					console.log(vApp.registeredCourses);
 			}
 		}, //watch
 		//Computed search tables  function used to set checkboxes in columns of 3
@@ -308,6 +309,55 @@ function fillTable(){
 			}
 } //fillTable
 
+//next three functions are for navbar utility
+function getReg(){
+	console.log("getreg");
+	var x = document.getElementById("register");
+	var y = document.getElementById("schedule");
+	var z = document.getElementById("wishlist");
+	var a = document.getElementById("schedBut");
+	var b = document.getElementById("wishBut");
+	var c = document.getElementById("regBut");
+	
+	x.style.display = 'block';
+	y.style.display = 'none';
+	z.style.display = 'none';
+	a.style.display = 'block';
+	b.style.display = 'block';
+	c.style.display = 'none';
+}
+function getSched(){
+	console.log("getsched");
+	var x = document.getElementById("register");
+	var y = document.getElementById("schedule");
+	var z = document.getElementById("wishlist");
+	var a = document.getElementById("schedBut");
+	var b = document.getElementById("wishBut");
+	var c = document.getElementById("regBut");
+	
+	x.style.display = 'none';
+	y.style.display = 'block';
+	z.style.display = 'none';
+	a.style.display = 'none';
+	b.style.display = 'block';
+	c.style.display = 'block';
+}
+function getWish(){
+	console.log("getwish");
+	var x = document.getElementById("register");
+	var y = document.getElementById("schedule");
+	var z = document.getElementById("wishlist");
+	var a = document.getElementById("schedBut");
+	var b = document.getElementById("wishBut");
+	var c = document.getElementById("regBut");
+	
+	x.style.display = 'none';
+	y.style.display = 'none';
+	z.style.display = 'block';
+	a.style.display = 'block';
+	b.style.display = 'none';
+	c.style.display = 'block';
+}
 
 //function getLogin is used to parse the html written in the search.html page to store the user's login
 function getLogin(){
