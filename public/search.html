@@ -3,8 +3,7 @@
 	<head>
 		<title> Search Page </title>
 
-		<!-- Stylesheet -->
-		<link rel="stylesheet" href="searchStyle.css">
+
 
 		<!-- Vue Script -->
 		<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -27,13 +26,15 @@
 		<link href="https://unpkg.com/nprogress@0.2.0/nprogress.css" rel="stylesheet" />
 		<script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
 
+		<!-- Stylesheet -->
+		<link rel="stylesheet" href="searchStyle.css">
 	</head>
 
 	<body onload= 'init()'>
 
 		<nav class="navbar">
 			<!--St Thomas logo header -->
-			<a class="nav-brand st-thomas-logo" href="http://www.stthomas.edu/">
+			<a class="nav-brand st-thomas-logo" id='logo' href="http://www.stthomas.edu/">
 				University of St. Thomas  EMinnesota  EA private, Catholic liberal arts university
 			</a>
 			<a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
@@ -75,7 +76,7 @@
 
 				<input id="courseSearch" type="text" v-model="courseNumberSearch" placeholder= "Search by course number"> </input>
 				<input id="crnSearch" type="text" v-model="crnNumberSearch" placeholder= "Search by CRN" style="margin: 10px;"> </input>
-				
+
 				</div>
 
 
@@ -84,8 +85,8 @@
 				<button type="button" onclick="checkStatus()">Search</button>
 				<!-- v-bind:id="item.CRN + 'color'"  -->
 			<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
-				<div id="results">
-					<table v-for="item in searchResults" v-bind:id="item.CRN + 'color'" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
+				<div id="results" >
+					<table v-for="item in searchResults" v-bind:id="item.CRN + 'color'" style="border-width: 1px; border-color: black; border: solid; margin: 10px; border-collapse: separate; max-width:926px;">
 
 						<tr  v-on:click="reveal(item.CRN,item.times)" onMouseOver="this.style.cursor='pointer'">
 							<td class="tableData" style="width:75px;">
@@ -147,7 +148,7 @@
 				<p>wishlist</p>
 			</div><!-- wishlist div-->
 		</div><!-- app div-->
-		
+
 	</body>
 
 
