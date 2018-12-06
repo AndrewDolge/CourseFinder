@@ -9,7 +9,7 @@ var app = express();
 var mime = require('mime-types');
 var md5  = require('./md5.min')
 
-var port = 8007;
+var port = 8014;
 var public_dir = path.join(__dirname, 'public'); 
 
 //Connection to our database
@@ -333,6 +333,69 @@ app.post('/register/:rconst', (req, res) => {
 	}); //ust_db.all Select People.registered_courses
 }); //app.post('/register/:rconst')
 
+//App.post(drop) is a post request called when a student selects the drop button for a previously registered course 
+app.post('/drop/:dconst', (req, res) => {
+	
+	//Variable if there is more than one person registered for a course 
+	var moreThanOne = false;
+	//The login of the user attempting to drop
+	var login = '';
+	//The section CRN the student is dropping
+	var course_drop = '';
+	//Components contains a string of login and crn separated with a +
+	var components = req.params.dconst;
+	
+	//Split out and store the login and CRN information
+	components = components.split('+');
+	login = components[0];
+	course_drop = parseInt(components[1]);
+	
+	//1. Obtain the capacity and students ids registered for the course being dropped 
+	ust_db.all("Select Sections.registered, Sections.capacity From Sections where crn == ?",course_drop, (err, rows) => {
+		//If there is a waitlist nextRegNum will contain the first number on the waitlist, false if no waitlist 
+		var nextRegNum = false;
+		//An array of student ids registered for the course 
+		var checkNextReg = [];
+		//The capacity of the course 
+		var cap;
+	
+		cap = rows[0].capacity;
+		
+		console.log("Capacity: "+cap);
+		
+		checkNextReg = rows[0].registered.split(',');
+		
+		var position = checkNextReg.indexOf(login);
+		
+		//If only one person registered for course and they drop, moreThanOne will be false in order to set Sections.registered in database to null
+		if(checkNextReg.length > 1){
+			moreThanOne = true;
+		}
+		
+		//If the amount of registered students exceeds the capacity nextRegNum is equal to the first id on the waitlist 
+		if(checkNextReg.length > cap){
+			nextRegNum = checkNextReg[cap];
+			console.log("Next Reg Num: "+nextRegNum);
+		}
+		//If there is no waitlist or the person dropping is the first person on the waitlist, then no need to worry about a waitlister becoming registered 
+		if(nextRegNum === false || nextRegNum === login){
+			removeFromSections(checkNextReg,login,course_drop,moreThanOne);
+			removePeopleOne(login,course_drop,'null',res);
+		}
+		//Otherwise we will need to test to see if a waitlister needs to become registered with removePeopleTwo
+		else{
+			console.log('here in dssd');
+			removeFromSections(checkNextReg,login,course_drop,moreThanOne);
+			removePeopleTwo(login,course_drop,nextRegNum, res);
+			
+		}
+		
+	
+	}); //ust_db.all(Select Sections)
+	
+	
+})//app.post(/drop)
+
 
 //Get request is executed after login in to store the users personal database information
 app.get('/position/:pconst', (req, res) => {
@@ -618,4 +681,189 @@ function insertCRN(login, course_reg, waitlisted){
 	}); //ust_db.all Select Sections.registered
 	
 } //function insertCRN
+
+//Remove from sections is called from the drop button post request and is used to remove the dropped students user id from the sections table registered column
+function removeFromSections(list,login,crn,moreThanOne){
+		var forSQL = '';
+	
+		//If there was only one student and they dropped, set registered to null
+		if(moreThanOne === false){
+			ust_db.run("UPDATE Sections SET registered=null WHERE Sections.crn == ?", crn, (err, rows) => {
+						if (err) {
+							console.log('Error running query');
+						}
+						else {	
+							
+						}
+			});
+		}
+		
+		if(moreThanOne === true){
+			var i;
+			
+			//Remove the student's user id who is dropping from the current list of registered students 
+			for(i =0; i < list.length; i++){
+				if(login == list[i]){
+					list.splice(i,1);
+				}
+			}
+			//Rebuild the string based on current array list 
+			for(i = 0; i < list.length; i++){
+				forSQL += list[i];
+				if(i !== list.length-1){
+					forSQL += ',';
+				}
+				
+			}
+			
+			//Update the table for the new listing 
+			ust_db.run("UPDATE Sections SET registered= \""+forSQL+"\" WHERE Sections.crn == ?", crn, (err, rows) => {
+						if (err) {
+							console.log('Error running query');
+						}
+						else {	
+							
+						}
+			});
+		}
+	
+}//function removeFromSections 
+
+//Function removePeopleOne is used to remove the CRN from the registered_courses listing of the student dropping 
+function removePeopleOne(login,course_drop,nextRegNum,res){
+	console.log('here');
+	//An array of the students currently registered CRNS
+	var previous = []
+	//A string used to insert into SQL
+	var forSQL = '';
+	
+	ust_db.all("Select People.registered_courses From People where university_id == ?",login, (err, rows) => {
+			previous = rows[0].registered_courses.split(',');
+			
+			var i;
+			for(i = 0; i < previous.length; i++){
+				
+				//If the student was on the waitlist for the dropped course
+				if(previous[i][0] === 'W'){
+					if(course_drop == previous[i].substring(1)){
+						previous.splice(i,1);
+					}
+				}
+				//If the student was normally registered for the course 
+				else if(course_drop == previous[i]){
+						previous.splice(i,1);
+				}
+				
+			}
+			//Rebuild the string for SQL
+			for(i = 0; i < previous.length; i++){
+				forSQL += previous[i];
+				if(i !== previous.length-1){
+					forSQL += ',';
+				}
+			}
+			//If the student has other registered courses after removing the dropped course 
+			if(previous.length !== 0){
+				ust_db.run("UPDATE People SET registered_courses= \""+forSQL+"\" WHERE People.university_id == ?", login, (err, rows2) => {
+							if (err) {
+								console.log('Error running query');
+							}
+							else {	
+								res.send(nextRegNum);
+							}
+				});
+			}
+			//If that was the only course the student took and they dropped set registered_courses = null
+			else if(previous.length === 0){
+				ust_db.run("UPDATE People SET registered_courses=null WHERE People.university_id == ?", login, (err, rows2) => {
+							if (err) {
+								console.log('Error running query');
+							}
+							else {	
+								res.send(nextRegNum);
+							}
+				});
+					
+			}
+			
+	})//ust_db.all(Select People.registered_courses)
+	
+}
+
+
+
+//Function removePeopleTwo is used to test and resolve if a dropped student causes another student to move off the waitlist 
+function removePeopleTwo(login,course_drop,nextRegNum, res){
+	//Variable that determines if the two students were both on the waitlist 
+	var twoWaitLists = false;
+	
+	console.log(nextRegNum);
+	//Array of the registered courses listing of the student dropping 
+	var loginRegisteredCourses = [];
+	//Array of the registered courses listing of the student 1st on the waitlist 
+	var waitlistRegisteredCourses =[];
+	ust_db.all("Select People.registered_courses From People where university_id == \""+login+"\"", (err, rows) => {
+		
+					loginRegisteredCourses = rows[0].registered_courses.split(',');
+					
+		ust_db.all("Select People.registered_courses From People where university_id == \""+nextRegNum+"\"", (err, rows2) => {			
+					
+					
+					waitlistRegisteredCourses = rows2[0].registered_courses.split(',');
+					
+					console.log("Login Registered Courses: "+loginRegisteredCourses);
+					console.log("Waitlist Registered Courses: "+waitlistRegisteredCourses);
+					
+					//If both the person dropping and the student first on the waitlist are on the waitlist then we do not have to do any manipulation to the first person on the waitlist 
+					if(loginRegisteredCourses.includes(course_drop.toString()) === false && waitlistRegisteredCourses.includes(course_drop.toString()) === false){
+						twoWaitLists = true;
+					}
+					
+					console.log('Two WaitLists: '+twoWaitLists);
+					
+					if(twoWaitLists === true){	
+						removePeopleOne(login,parseInt(course_drop),'null',res);
+					}
+					
+					//If a registered student drops and there is a person on the waitlist, move that person on the waitlist to registered 
+					if(twoWaitLists === false){
+						var forSQL = '';
+						
+						console.log('NEW CASE');
+						
+						var i;
+						//Remove the W from the registered courses 
+						for(i = 0; i < waitlistRegisteredCourses.length; i++){
+							if(waitlistRegisteredCourses[i][0] === 'W'){
+								
+								if(course_drop == waitlistRegisteredCourses[i].substring(1)){
+									waitlistRegisteredCourses[i] = waitlistRegisteredCourses[i].substring(1);
+								}
+							}	
+						}
+						//Build up new string and call a Update SQL statement 
+						for(i = 0; i < waitlistRegisteredCourses.length; i++){
+							forSQL += waitlistRegisteredCourses[i];
+							if(i !== waitlistRegisteredCourses.length-1){
+								forSQL += ',';
+							}
+						}
+						//Updating the database for the waitlisted course that is now registered 
+						ust_db.run("UPDATE People SET registered_courses= \""+forSQL+"\" WHERE People.university_id == ?", nextRegNum, (err, rows3) => {
+										if (err) {
+											console.log('Error running query');
+										}
+										else {
+											//Call removePeopleOne to adjust database for the student actually dropping 
+											removePeopleOne(login,course_drop,nextRegNum,res)  
+										}
+						}); //ust_db.run Update People
+					}
+					
+		})//Select People.registered nextRegNum
+	})//Select People.registered login
+			
+	
+}//function removePeopleTwo
+
 

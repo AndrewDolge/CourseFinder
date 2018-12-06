@@ -98,7 +98,27 @@ function init(){
 				return result;
 			}
 
-		} //computed
+		}, //computed
+		methods:{
+			inCourse(crn){
+				var index;
+				for(index = 0; index < vApp.registeredCourses.length; index++){
+						if(crn == vApp.registeredCourses[index]){
+							return true;
+						}
+						if(vApp.registeredCourses[index][0] === 'W'){
+							if(crn == vApp.registeredCourses[index].substring(1)){
+								return true;
+							}
+							
+						}
+		
+				}
+				return false;
+				
+			}
+			
+		}//methods
 	});
 
 	document.getElementsByClassName("hideInfo").display = "none";
@@ -468,6 +488,68 @@ function viewRoster(crn){
 
 
 }
+//Function drop class is used to send a post request to the server when a user desires to drop a class, takes the crn of the course to drop
+//NOTE: On next part of project when add web sockets, will need to add ability to also adjust the registered courses for the user moving off the waitlist 
+function dropClass(crn){
+	var urlString = '';
+	urlString = vApp.login+'+'+crn;
+	var settings = {
+				"async": true,
+				"crossDomain": true,
+				"url": "/drop/"+urlString,
+				"method": "POST"
+			   }
+	$.ajax(settings).done(function (response) {
+		var i;
+		var isR = true;
+		for(i = 0; i < vApp.registeredCourses.length; i++){
+				if(vApp.registeredCourses[i][0] === 'W'){
+					//If the dropped course is from a waitlist set isR to false and remove the course from registered courses (for color)
+					if(crn == vApp.registeredCourses[i].substring(1)){
+						vApp.registeredCourses.splice(i,1);
+						isR = false;
+					}
+								
+				}
+				
+				else if(crn == vApp.registeredCourses[i]){
+					vApp.registeredCourses.splice(i,1);
+				}	
+				
+		}
+		//If the dropped course was a registered course 
+		if(isR == true){
+			var position;
+			//Get the position of the CRN in searchResults array
+			for(i=0; i < vApp.searchResults.length; i++){
+						if(crn == vApp.searchResults[i].CRN){
+							position = i;		
+						}	
+			}
+			//If there was a waitlist on the course just subtract one from waitlist (since one moved off registered and one moved on registered from waitlist)
+			if(vApp.searchResults[position].waitlist > 0){
+				
+				vApp.searchResults[position].waitlist = vApp.searchResults[position].waitlist -1;	
+			}
+			//If no waitlist then just remove one from the registered count 
+			else if(vApp.searchResults[position].waitlist == 0){
+				vApp.searchResults[position].registered = vApp.searchResults[position].registered -1;
+				
+			}
+		}
+		//If the dropped course is from the waitlist then only need to worry about subtracting the waitlist count 
+		else if(isR == false){
+			for(i=0; i < vApp.searchResults.length; i++){
+					if(crn == vApp.searchResults[i].CRN){
+						vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist -1;	
+					}		
+				}
+		}
+	
+	});
+	
+}//function dropClass(crn)
+
 //Function calculates the amount of registered students to display in the search table
 function getRegCount(list,capacity){
 
