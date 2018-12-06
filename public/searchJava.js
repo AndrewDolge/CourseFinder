@@ -327,8 +327,8 @@ function fillTable(){
 				}) //ajax(settings)
 			} //if(atLeastOneChecked)
 			else{
-
-				console.log("Must select at least one subject");
+				alert("Please choose atleast one subject box");
+				//console.log("Must select at least one subject");
 
 			}
 } //fillTable
