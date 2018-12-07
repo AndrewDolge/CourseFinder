@@ -207,7 +207,33 @@ app.post('/search/:nconst', (req, res) => {
 	
 	//5. If a crn or course number is added to the search, call searchWithText function 
 	else{
-		searchWithText(res,subsForSQL,crnReq,courseNumReq);
+		//Test to make sure searches in box are valid integers for the SQL query if not send back to user to notify
+		var pass = true;
+		if(crnReq !== ''){
+			var test = isNaN(crnReq);
+			//console.log(test);
+			if(test == true){
+				pass = false;
+			}
+		}
+		
+		if(courseNumReq !== ''){
+			var test2 = isNaN(courseNumReq);
+			//console.log('CourseNum: ' +test2);
+			if(test2 == true){
+				pass = false;
+			}
+		}
+		
+		if(pass === true){
+			searchWithText(res,subsForSQL,crnReq,courseNumReq);
+		}
+		else{
+			res.send('Bad')
+		}
+			
+		
+		//searchWithText(res,subsForSQL,crnReq,courseNumReq);
 
 	}
 	

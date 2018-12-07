@@ -278,51 +278,56 @@ function fillTable(){
 				}
 
 				$.ajax(settings).done(function (response) {
-					var i;
-					var sub;
-					var cNum;
-					var cred;
-					var cName;
-					var des;
-					//Fills searchResults in the vApp
-					for(i = 0; i < response.length; i++){
-						sub = response[i].subject;
-						cNum = response[i].course_number;
-						sNum = response[i].section_number;
-						cName =  response[i].name;
-						build = response[i].building;
-						roomNumber = response[i].room;
-						prof = response[i].professors;
-						cred = response[i].credits
-						crn = response[i].crn;
-						time = response[i].times;
-						des = response[i].description;
+					if(response !== 'Bad'){
+						var i;
+						var sub;
+						var cNum;
+						var cred;
+						var cName;
+						var des;
+						//Fills searchResults in the vApp
+						for(i = 0; i < response.length; i++){
+							sub = response[i].subject;
+							cNum = response[i].course_number;
+							sNum = response[i].section_number;
+							cName =  response[i].name;
+							build = response[i].building;
+							roomNumber = response[i].room;
+							prof = response[i].professors;
+							cred = response[i].credits
+							crn = response[i].crn;
+							time = response[i].times;
+							des = response[i].description;
 
-						cap = response[i].capacity;
-						reg = getRegCount(response[i].registered,cap);
-						wait = getWaitCount(response[i].registered,cap); //will have to manually calculate, something like if registered > capacity
+							cap = response[i].capacity;
+							reg = getRegCount(response[i].registered,cap);
+							wait = getWaitCount(response[i].registered,cap); //will have to manually calculate, something like if registered > capacity
 
-						vApp.searchResults.push({
-							subject: sub,
-							course_number: cNum,
-							section_number: sNum,
-							course_name: cName,
-							building: build,
-							room: roomNumber,
-							professors: prof,
-							credits: cred,
-							CRN: crn,
-							times: time,
-							description: des,
-							registered: reg,
-							capacity: cap,
-							waitlist: wait
-						});
-					} //for(i = 0; i < response.length; i++)
+							vApp.searchResults.push({
+								subject: sub,
+								course_number: cNum,
+								section_number: sNum,
+								course_name: cName,
+								building: build,
+								room: roomNumber,
+								professors: prof,
+								credits: cred,
+								CRN: crn,
+								times: time,
+								description: des,
+								registered: reg,
+								capacity: cap,
+								waitlist: wait
+							});
+						} //for(i = 0; i < response.length; i++)
 
 
-					//console.log(response);
-
+						//console.log(response);
+					}//if!== Bad
+					else{
+						alert("Please enter only integers into the search boxes");
+						
+					}
 
 				}) //ajax(settings)
 			} //if(atLeastOneChecked)
