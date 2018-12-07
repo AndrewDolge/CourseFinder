@@ -111,6 +111,7 @@ function init(){
 
 			inCourse(crn){
 				var index;
+				console.log(crn)
 				for(index = 0; index < vApp.registeredCourses.length; index++){
 						if(crn == vApp.registeredCourses[index].crn){
 							return true;
@@ -423,13 +424,20 @@ function getPosition(){
 	$.ajax(info).done(function (response) {
 		//console.log(response);
 			//Obtain the users registered courses data and set it in the Vue App
-			if(response.courses.length != 0){
+			console.log(response);
+			/*if(response.courses.length != 0){
 				vApp.registeredCourses = response.courses;
+			}*/
+			//console.log(response);
+			if(response !== 'student' && response !== 'faculty'){
+				vApp.registeredCourses = response.courses;
+				vApp.position = response.position;
 			}
+			else{
 			//Set the position of the user in the Vue app
-			vApp.position = response.position;
-
-
+				vApp.position = response
+			}
+			
 	});
 
 
