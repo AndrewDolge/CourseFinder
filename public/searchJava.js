@@ -100,6 +100,14 @@ function init(){
 
 		}, //computed
 		methods:{
+
+			timeConflict(time){
+				console.log("time: ")
+				console.log(time)
+				return true;
+
+			},
+
 			inCourse(crn){
 				var index;
 				for(index = 0; index < vApp.registeredCourses.length; index++){
@@ -409,7 +417,7 @@ function getPosition(){
 			   }
 
 	$.ajax(info).done(function (response) {
-		console.log(response);
+		//console.log(response);
 			//Obtain the users registered courses data and set it in the Vue App
 			if(response[0].registered_courses !== null){
 				vApp.registeredCourses = response[0].registered_courses.split(',');

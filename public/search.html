@@ -129,7 +129,7 @@
 							<!-- For students if they are currently registered for a course display the drop button, otherwise display the register button -->
 							<td>
 						
-								<span v-if="inCourse(item.CRN) === false">   
+								<span v-if="timeConflict(item.times) && inCourse(item.CRN) === false">   
 									<span v-if="position === 'student'">  <button type="button" v-on:click="register(item.CRN)">Register</button> </span> 
 								</span>
 								<span v-if="inCourse(item.CRN) === true">

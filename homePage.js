@@ -7,7 +7,7 @@ var sqlite3 = require('sqlite3');
 var multiparty = require('multiparty');
 var app = express(); 
 var mime = require('mime-types');
-var md5  = require('./md5.min')
+
 
 var port = 8014;
 var public_dir = path.join(__dirname, 'public'); 
@@ -32,7 +32,7 @@ app.get('/home', (req, res) => {
     	fs.readFile(path.join(public_dir, 'index.html'), (err, data) => { 
 			if(err){
 				res.writeHead(404, {'Content-Type': 'text/plain'});
-				res.write('Oh no! Could\'t find that page!'); 
+				res.write('Oh no! Couldn\'t find that page!'); 
 				res.end();
 			} 
 			
@@ -55,8 +55,7 @@ app.post('/login' , (req, res) => {
     form.parse(req, (err, fields, files) => {
 		
 		login = fields.login;
-		//TODO: Salt the password
-		pass = md5(fields.passwd);
+		pass = fields.passwd;
 
 		
 		
@@ -113,8 +112,8 @@ app.post('/new', (req, res) => {
     form.parse(req, (err, fields, files) => {
 		
 		login = fields.login;
-		//TODO salt the password
-		pass = md5(fields.passwd);
+		
+		pass = fields.passwd;
 		position = fields.position;
 		first = fields.firstName;
 		last = fields.lastName;
