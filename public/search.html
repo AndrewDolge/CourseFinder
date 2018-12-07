@@ -3,8 +3,7 @@
 	<head>
 		<title> Search Page </title>
 
-		<!-- Stylesheet -->
-		<link rel="stylesheet" href="searchStyle.css">
+
 
 		<!-- Vue Script -->
 		<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
@@ -27,13 +26,15 @@
 		<link href="https://unpkg.com/nprogress@0.2.0/nprogress.css" rel="stylesheet" />
 		<script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
 
+		<!-- Stylesheet -->
+		<link rel="stylesheet" href="searchStyle.css">
 	</head>
 
 	<body onload= 'init()'>
 
 		<nav class="navbar">
 			<!--St Thomas logo header -->
-			<a class="nav-brand st-thomas-logo" href="http://www.stthomas.edu/">
+			<a class="nav-brand st-thomas-logo" id='logo' href="http://www.stthomas.edu/">
 				University of St. Thomas  EMinnesota  EA private, Catholic liberal arts university
 			</a>
 			<a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown">
@@ -41,99 +42,126 @@
         	</a>
 			<div class="dropdown-menu dropdown-menu-right">
 				<a class="dropdown-item" href="about.html">About Us</a>
-				<a class="dropdown-item" href="#">Schedule</a>
+				<a class="dropdown-item" id="regBut"  onclick="getReg()" onMouseOver="this.style.cursor='pointer'" style="display:none;">Register</a>
+				<a class="dropdown-item" id="schedBut" onclick="getSched()" onMouseOver="this.style.cursor='pointer'" style="display:block;">Schedule</a>
+				<a class="dropdown-item" id="wishBut" onclick="getWish()" onMouseOver="this.style.cursor='pointer'" style="display:block;">Course Wishlist</a>
 			    <div class="dropdown-divider"></div>
 			    	<a class="dropdown-item" href="index.html">Log Out</a>
        		</div>
 		</nav>
 
-
 		<div id="app">
-			<table  style="border-width: 1px; border-color: black; border: solid; margin: 10px;" >
-				<tr>
-					<td style="width:40px; font-size: 20px; background-color: #d1d3d2" onMouseOver="this.style.cursor='pointer'" onclick="showSub()">
-						<center id="code">&#43;</center>
-					</td>
-					<td>
-						Choose a Subject
-					</td>
+			<div id="register"  style="display:block; margin:10px;">
+				<table  style="border-width: 1px; border-color: black; border: solid; margin: 10px;" >
+					<tr>
+						<td style="width:40px; font-size: 20px; background-color: #d1d3d2" onMouseOver="this.style.cursor='pointer'" onclick="showSub()">
+							<center id="code">&#43;</center>
+						</td>
+						<td>
+							Choose a Subject
+						</td>
+					</tr>
+				</table>
+				<!-- Course checkboxes -->
+				<div id="subjects">
+					<table id="list" style= "display: none;">
+						<tr class="dontsplit" v-for="row in searchTables">
+							<td v-for="item in row"><input v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
+						</tr>
+					</table>
+				</div>
+				<br/>
+				<!--Course Number and CRN search boxes-->
+				<div id='searchBoxes'>
+
+				<input id="courseSearch" type="text" v-model="courseNumberSearch" placeholder= "Search by course number"> </input>
+				<input id="crnSearch" type="text" v-model="crnNumberSearch" placeholder= "Search by CRN" style="margin: 10px;"> </input>
+
+				</div>
+
+
+
+				<!--Search Button used for filling table-->
+				<button type="button" onclick="checkStatus()">Search</button>
+				<!-- v-bind:id="item.CRN + 'color'"  -->
+			<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
+				<div id="results" >
+					<table v-for="item in searchResults" v-bind:id="item.CRN + 'color'" style="border-width: 1px; border-color: black; border: solid; margin: 10px; border-collapse: separate; max-width:926px;">
+
+						<tr  v-on:click="reveal(item.CRN,item.times)" onMouseOver="this.style.cursor='pointer'">
+							<td class="tableData" style="width:75px;">
+								<center> {{item.subject}} </center>
+							</td>
+							<td class="tableData" style="width: 75px;">
+								<center>{{item.course_number}}-{{item.section_number}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.course_name}}</center>
+							</td>
+							<td class="tableData" style="width: 150px;">
+								<center>{{item.building}}</center> <center>{{item.room}}</center>
+							</td>
+
+							<td class="tableData">
+								<center> {{item.professors}} </center>
+							</td>
+							<td class="tableData">
+								<center>{{item.credits}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.CRN}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.registered}}/{{item.capacity}}</center>
+							</td>
+							<td class="tableData">
+								<center>{{item.waitlist}}</center>
+							</td>
+							<!--insert table with course data-->
+						</tr>
+						<tr v-bind:id="item.CRN" class="hideInfo" style="display: none;">
+							<td style="width: 300px;">
+								{{item.description}}
+							</td>
+								<td v-bind:id="item.CRN+'time'">
+							</td>
+							
+							<!-- For students if they are currently registered for a course display the drop button, otherwise display the register button -->
+							<td>
+						
+								<span v-if="inCourse(item.CRN) === false">   
+									<span v-if="position === 'student'">  <button type="button" v-on:click="register(item.CRN)">Register</button> </span> 
+								</span>
+								<span v-if="inCourse(item.CRN) === true">
+									<span v-if="position === 'student'">  <button type="button" v-on:click="dropClass(item.CRN)">Drop</button> </span> 
+								</span>
+						
+							</td>
+						
+							<!--For faculty only display the view roster button-->
+							<td> <span v-if="position === 'faculty'"> <button type="button" v-on:click="viewRoster(item.CRN)">View Roster</button> </span> </td>
+							<!--Displays the the roster of the CRN for a faculty when requested-->
+							<td v-for="stuff in viewRosterResults"> <span v-if="viewRosterResults.length > 0 && item.CRN == viewRegCRN"> {{stuff.university_id}} - {{stuff.first_name}} {{stuff.last_name}} </span> </td>
+							
+							
+
+						</tr>
+					</table>
+
+				</div>
+			</div><!-- register div -->
+			<div id="schedule" style="display: none; margin:10px;">
+			<table >
+				<tr v-for="reg in registeredCourses">
+					<td>{{reg}}</td>
 				</tr>
 			</table>
-			<!-- Course checkboxes -->
-			<div id="subjects">
-				<table id="list" style= "display: none;">
-					<tr class="dontsplit" v-for="row in searchTables">
-						<td v-for="item in row"><input v-bind:id= 'item.subject' class= 'subSelect' type = 'checkbox' v-bind:value= 'item.subject' /><label>{{item.subject}}: {{item.full_name}}</label></td>
-					</tr>
-				</table>
-			</div>
-			<br/>
-			<!--Course Number and CRN search boxes-->
-			<div id='searchBoxes'>
+			</div><!-- schedule div-->
+			<div id="wishlist" style="display: none; margin:10px;">
+				<p>wishlist</p>
+			</div><!-- wishlist div-->
+		</div><!-- app div-->
 
-			<input id="courseSearch" type="text" v-model="courseNumberSearch" placeholder= "Search by course number"> </input>
-			<input id="crnSearch" type="text" v-model="crnNumberSearch" placeholder= "Search by CRN"> </input>
-
-			</div>
-
-
-
-			<!--Search Button used for filling table-->
-			<button type="button" onclick="checkStatus()">Search</button>
-			<!-- v-bind:id="item.CRN + 'color'"  -->
-		<!-- Table running with Vue to automatically fill in table information based on the subjects selected by the user -->
-			<div id="results">
-				<table v-for="item in searchResults" v-bind:id="item.CRN + 'color'" style="border-width: 1px; border-color: black; border: solid; margin: 10px;">
-
-					<tr  v-on:click="reveal(item.CRN,item.times)" onMouseOver="this.style.cursor='pointer'">
-						<td class="tableData" style="width:75px;">
-							<center> {{item.subject}} </center>
-						</td>
-						<td class="tableData" style="width: 75px;">
-							<center>{{item.course_number}}-{{item.section_number}}</center>
-						</td>
-						<td class="tableData">
-							<center>{{item.course_name}}</center>
-						</td>
-						<td class="tableData" style="width: 150px;">
-							<center>{{item.building}}</center> <center>{{item.room}}</center>
-						</td>
-
-						<td class="tableData">
-							<center> {{item.professors}} </center>
-						</td>
-						<td class="tableData">
-							<center>{{item.credits}}</center>
-						</td>
-						<td class="tableData">
-							<center>{{item.CRN}}</center>
-						</td>
-						<td class="tableData">
-							<center>{{item.registered}}/{{item.capacity}}</center>
-						</td>
-						<td class="tableData">
-							<center>{{item.waitlist}}</center>
-						</td>
-						<!--insert table with course data-->
-					</tr>
-					<tr v-bind:id="item.CRN" class="hideInfo" style="display: none;">
-						<td style="width: 300px;">
-							{{item.description}}
-						</td>
-							<td v-bind:id="item.CRN+'time'">
-						</td>
-
-						<!-- Register / View Roster buttons depending on position of the user -->
-						<td> <span v-if="position === 'student'">  <button type="button" v-on:click="register(item.CRN)">Register</button> </span> </td>
-						<td> <span v-if="position === 'faculty'"> <button type="button" v-on:click="viewRoster(item.CRN)">View Roster</button> </span> </td>
-						<!--Displays the the roster of the CRN for a faculty when requested-->
-						<td v-for="stuff in viewRosterResults"> <span v-if="viewRosterResults.length > 0 && item.CRN == viewRegCRN"> {{stuff.university_id}} - {{stuff.first_name}} {{stuff.last_name}} </span> </td>
-
-					</tr>
-				</table>
-
-			</div>
-		</div>
 	</body>
 
 
