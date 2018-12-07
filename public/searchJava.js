@@ -24,7 +24,7 @@ function init(){
 			viewRosterResults: [],
 			//Holds the crn that has been requested to view the roster of
 			viewRegCRN: '',
-			//An array list of the users registered courses to be used for coloring section rows
+			//An array list of objects containing course number, crn, times, subject and name
 			registeredCourses: []
 		},
 		//Watchers for when searchResults or registeredCourses arrays change in order to change color
@@ -37,13 +37,13 @@ function init(){
 						x = document.getElementById(vApp.searchResults[i].CRN + 'color').style.backgroundColor = '#d1d3d2';
 					}
 					for(i=0;i<vApp.registeredCourses.length; i++){
-						x = document.getElementById(vApp.registeredCourses[i] + 'color');
+						x = document.getElementById(vApp.registeredCourses[i].crn + 'color');
 						console.log(x);
 						if(x != null){
 							x.style.backgroundColor = '#45e86e';
 						}
 						else{
-							var y = vApp.registeredCourses[i].substring(1,vApp.registeredCourses[i].length);
+							var y = vApp.registeredCourses[i].crn.substring(1,vApp.registeredCourses[i].crn.length);
 							x = document.getElementById(y + 'color');
 							if(x != null){
 								x.style.backgroundColor = '#e6ed87';
@@ -59,20 +59,21 @@ function init(){
 						x = document.getElementById(vApp.searchResults[i].CRN + 'color').style.backgroundColor = '#d1d3d2';
 					}
 					for(i=0;i<vApp.registeredCourses.length; i++){
-						x = document.getElementById(vApp.registeredCourses[i] + 'color');
-						console.log(x);
+						console.log("here" + vApp.registeredCourses[i].crn);
+						x = document.getElementById(vApp.registeredCourses[i].crn + 'color');
+						//console.log(x);
 						if(x != null){
 							x.style.backgroundColor = '#45e86e';
 						}
 						else{
-							var y = vApp.registeredCourses[i].substring(1,vApp.registeredCourses[i].length);
+							var y = vApp.registeredCourses[i].crn.substring(1,vApp.registeredCourses[i].crn.length);
 							x = document.getElementById(y + 'color');
 							if(x != null){
 								x.style.backgroundColor = '#e6ed87';
 							}
 						}
 					}
-					console.log(vApp.registeredCourses);
+					
 			}
 		}, //watch
 		//Computed search tables  function used to set checkboxes in columns of 3
@@ -103,11 +104,11 @@ function init(){
 			inCourse(crn){
 				var index;
 				for(index = 0; index < vApp.registeredCourses.length; index++){
-						if(crn == vApp.registeredCourses[index]){
+						if(crn == vApp.registeredCourses[index].crn){
 							return true;
 						}
-						if(vApp.registeredCourses[index][0] === 'W'){
-							if(crn == vApp.registeredCourses[index].substring(1)){
+						if(vApp.registeredCourses[index].crn[0] === 'W'){
+							if(crn == vApp.registeredCourses[index].crn.substring(1)){
 								return true;
 							}
 							
@@ -130,7 +131,6 @@ function init(){
 	//Call to getPosition function to get request the position of the user
 	//Gets all of the users data from the SQL people table, do this once after login or after each search?
 	getPosition();
-
 
 	//These are used to create a loading animation for each time data is requested from a server, and to end that animation when data is received
 	$( document ).ajaxStart(function() {
@@ -184,10 +184,21 @@ function reveal(crn, times){
 	loadthis(crn+'time',times);
 }
 
-function loadthis(y,z){
-	//console.log('here');
+//for schedule time formatting
+function makeThisWork(){
+	
+	var i;
+	console.log(vApp.registeredCourses.length);
+	for(i=0;i<vApp.registeredCourses.length;i++){
+		console.log("here");
+		loadthis(vApp.registeredCourses[i].crn+'scheduleTime',vApp.registeredCourses[i].times);
+	}
+}
+
+function loadthis(id,timeTable){
+	console.log('here');
 	var times = '';
-	var x = JSON.parse(z);
+	var x = JSON.parse(timeTable);
 	//console.log(x.T);
 	if(x.M != null){
 		times += "M " +x.M;
@@ -210,15 +221,7 @@ function loadthis(y,z){
 	if(x.SU != null){
 		times += "SU " +x.SU;
 	}
-	document.getElementById(y).innerHTML = times;
-
-	/*for(i=0;i<z.length;i++){
-		if(z[i]!='<'&&z[i]!='>'&&z[i]!='b'&&z[i]!='r'&&z[i]!='{'&&z[i]!='}'&&z[i]!='/'){
-			newStr += z[i];
-		}
-	}
-
-	console.log(newStr);*/
+	document.getElementById(id).innerHTML = times;
 }
 
 //Used to check if a user hass previously searched from the page, if so clear the searchResults array before the next search begins
@@ -356,6 +359,7 @@ function getReg(){
 	c.style.display = 'none';
 }
 function getSched(){
+	makeThisWork();
 	console.log("getsched");
 	var x = document.getElementById("register");
 	var y = document.getElementById("schedule");
@@ -411,11 +415,11 @@ function getPosition(){
 	$.ajax(info).done(function (response) {
 		console.log(response);
 			//Obtain the users registered courses data and set it in the Vue App
-			if(response[0].registered_courses !== null){
-				vApp.registeredCourses = response[0].registered_courses.split(',');
+			if(response.courses.length != 0){
+				vApp.registeredCourses = response.courses;
 			}
 			//Set the position of the user in the Vue app
-			vApp.position = response[0].position;
+			vApp.position = response.position;
 
 
 	});
@@ -441,7 +445,14 @@ function register(crn){
 				for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
 						vApp.searchResults[i].registered = vApp.searchResults[i].registered +1;
-						vApp.registeredCourses.push(crn);
+						var x = {
+							course_number: vApp.searchResults[i].course_number,
+							crn: vApp.searchResults[i].CRN,
+							name: vApp.searchResults[i].course_name,
+							subject: vApp.searchResults[i].subject,
+							times: vApp.searchResults[i].times
+						}
+						vApp.registeredCourses.push(x);
 					}
 
 				}
@@ -452,28 +463,36 @@ function register(crn){
 				for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
 						vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist +1;
-						vApp.registeredCourses.push("W" + crn);
+						var x = {
+							course_number: vApp.searchResults[i].course_number,
+							crn: "W" + vApp.searchResults[i].CRN,
+							name: vApp.searchResults[i].course_name,
+							subject: vApp.searchResults[i].subject,
+							times: vApp.searchResults[i].times
+						}
+						var y = document.getElementById(vApp.searchResults[i].CRN + "color");
+						vApp.registeredCourses.push(x);
 					}
 
 				}
 			}
-			console.log(response);
+			
 
 	});
 
 }
 
-function getColor(crn){
+/*function getColor(crn){
 	console.log("in getcolor");
 	var x = vApp.registeredCourses;
-	var y = x.split(',');
+	
 	var i;
-	for(i=0;i<y.length;i++){
-		if(crn == y[i]){
+	for(i=0;i<registeredCourses.length;i++){
+		if(crn == y[i].crn){
 			document.getElementById(crn+'color').style.backgroundColor = '#45e86e';
 		}
 	}
-}
+}*/
 
 //Function sends a post request to the server when a faculty selects the view roster button
 function viewRoster(crn){
@@ -508,16 +527,16 @@ function dropClass(crn){
 		var i;
 		var isR = true;
 		for(i = 0; i < vApp.registeredCourses.length; i++){
-				if(vApp.registeredCourses[i][0] === 'W'){
+				if(vApp.registeredCourses[i].crn[0] === 'W'){
 					//If the dropped course is from a waitlist set isR to false and remove the course from registered courses (for color)
-					if(crn == vApp.registeredCourses[i].substring(1)){
+					if(crn == vApp.registeredCourses[i].crn.substring(1)){
 						vApp.registeredCourses.splice(i,1);
 						isR = false;
 					}
 								
 				}
 				
-				else if(crn == vApp.registeredCourses[i]){
+				else if(crn == vApp.registeredCourses[i].crn){
 					vApp.registeredCourses.splice(i,1);
 				}	
 				

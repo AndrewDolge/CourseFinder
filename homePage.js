@@ -9,7 +9,7 @@ var app = express();
 var mime = require('mime-types');
 var md5  = require('./md5.min')
 
-var port = 8014;
+var port = 8007;
 var public_dir = path.join(__dirname, 'public'); 
 
 //Connection to our database
@@ -431,8 +431,30 @@ app.get('/position/:pconst', (req, res) => {
 		if (err) {
 			console.log('Error running query');
 		}
-		else {	
-			res.send(rows);
+		else {
+			var x = rows[0].registered_courses.split(",");
+			var cleanCourses = [];
+			var i;
+			for(i=0;i<x.length;i++){
+				cleanCourses.push(parseInt(x[i].replace('W','')));
+			}
+			console.log(cleanCourses);
+			var sql_courses = "Sections.crn == " + cleanCourses.join(" OR Sections.crn == ");
+			ust_db.all("SELECT Sections.crn, Sections.times, Sections.subject, Sections.course_number, Courses.name FROM Sections INNER JOIN Courses ON Sections.subject = Courses.subject AND Sections.course_number = Courses.course_number WHERE " + sql_courses, (err, rows2) => {
+				if(err){
+				}
+				else{
+					var i, j;
+					for(i=0;i<rows2.length;i++){
+						for(j=0;j<cleanCourses.length;j++){
+							if(cleanCourses[j] == parseInt(rows2[i].crn)){
+								rows2[i].crn = x[j];
+							}
+						}
+					}
+					res.send({courses: rows2, position: rows[0].position});
+				}
+			});
 		}
 	});
 });
