@@ -25,7 +25,10 @@ function init(){
 			//Holds the crn that has been requested to view the roster of
 			viewRegCRN: '',
 			//An array list of objects containing course number, crn, times, subject and name
-			registeredCourses: []
+			registeredCourses: [],
+			
+			////An array list of objects containing course number, crn, times, subject and name for the wishlist
+			wishlistCourses: []
 		},
 		//Watchers for when searchResults or registeredCourses arrays change in order to change color
 		watch: {
@@ -112,6 +115,7 @@ function init(){
 			inCourse(crn){
 				console.log("hello from line 113");
 				var index;
+				console.log(crn)
 				for(index = 0; index < vApp.registeredCourses.length; index++){
 						if(crn == vApp.registeredCourses[index].crn){
 							return true;
@@ -121,6 +125,18 @@ function init(){
 								return true;
 							}
 							
+						}
+		
+				}
+				return false;
+				
+			},
+			inWish(crn){
+				var index;
+				//console.log(crn)
+				for(index = 0; index < vApp.wishlistCourses.length; index++){
+						if(crn == vApp.wishlistCourses[index].crn){
+							return true;
 						}
 		
 				}
@@ -424,13 +440,20 @@ function getPosition(){
 	$.ajax(info).done(function (response) {
 		//console.log(response);
 			//Obtain the users registered courses data and set it in the Vue App
-			if(response.courses.length != 0){
+			console.log(response);
+			/*if(response.courses.length != 0){
 				vApp.registeredCourses = response.courses;
+			}*/
+			//console.log(response);
+			if(response !== 'student' && response !== 'faculty'){
+				vApp.registeredCourses = response.courses;
+				vApp.position = response.position;
 			}
+			else{
 			//Set the position of the user in the Vue app
-			vApp.position = response.position;
-
-
+				vApp.position = response
+			}
+			
 	});
 
 
@@ -486,7 +509,8 @@ function register(crn){
 				}
 			}
 			
-
+			//To remove from wishlist if they click the register button but course on wishlist
+			dropFromWish(crn);
 	});
 
 }
@@ -620,4 +644,39 @@ function getWaitCount(list,capacity){
 
 }
 
+//Called when a user clicks the addToWishlist button 
+function addToWish(crn){
+	
+	var i;
+	for(i=0; i < vApp.searchResults.length; i++){
+		if(crn == vApp.searchResults[i].CRN){
+
+			var buildWishlist = {
+				course_number: vApp.searchResults[i].course_number,
+				crn: vApp.searchResults[i].CRN,
+				name: vApp.searchResults[i].course_name,
+				subject: vApp.searchResults[i].subject,
+				times: vApp.searchResults[i].times
+			}
+			vApp.wishlistCourses.push(buildWishlist);
+		}
+
+	}
+	
+	
+}
+
+//Called when user clicks drop from wishlist button or if user has course on wishlisht but registers for it on search page 
+function dropFromWish(crn){
+	var index;
+	
+	for(index = 0; index < vApp.wishlistCourses.length; index++){
+			if(crn == vApp.wishlistCourses[index].crn){
+				vApp.wishlistCourses.splice(index,1);
+			}
+
+	}
+	
+	
+}
 
