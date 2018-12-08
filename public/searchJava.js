@@ -69,8 +69,9 @@ function init(){
 							x.style.backgroundColor = '#45e86e';
 						}
 						else{
-							var y = vApp.registeredCourses[i].crn.substring(1,vApp.registeredCourses[i].crn.length);
-							x = document.getElementById(y + 'color');
+							var y = vApp.registeredCourses[i].crn;
+							var z = y.substring(1,vApp.registeredCourses[i].crn.length);
+							x = document.getElementById(z + 'color');
 							if(x != null){
 								x.style.backgroundColor = '#e6ed87';
 							}
@@ -164,6 +165,23 @@ function init(){
 	$( document ).ajaxStop(function() {
 			NProgress.done();
 	});
+	console.log(vApp.position);
+	if(vApp.position == 'faculty'){ 
+	console.log("line 170");
+		var a = document.getElementById("schedBut");
+		var b = document.getElementById("wishBut");
+		
+		a.style.display = 'none';
+		b.style.display = 'none';
+	}
+}
+
+//register for all classes in wishlist
+function regForAll(){
+	var i;
+	for(i=0;i<vApp.wishlistCourses.length; i++){
+		register(vApp.wishlistCourses[i].crn);
+	}
 }
 
 function showSub(){
@@ -429,7 +447,6 @@ function getLogin(){
 
 //function gets the position (student or faculty) and stores it in our vApp
 function getPosition(){
-	//console.log(vApp.login);
 	var info = {
 				"async": true,
 				"crossDomain": true,
@@ -438,13 +455,9 @@ function getPosition(){
 			   }
 
 	$.ajax(info).done(function (response) {
-		//console.log(response);
 			//Obtain the users registered courses data and set it in the Vue App
 			console.log(response);
-			/*if(response.courses.length != 0){
-				vApp.registeredCourses = response.courses;
-			}*/
-			//console.log(response);
+			
 			if(response !== 'student' && response !== 'faculty'){
 				vApp.registeredCourses = response.courses;
 				vApp.position = response.position;
@@ -452,6 +465,13 @@ function getPosition(){
 			else{
 			//Set the position of the user in the Vue app
 				vApp.position = response
+			}
+			if(vApp.position == 'faculty'){ 
+				var a = document.getElementById("schedBut");
+				var b = document.getElementById("wishBut");
+				
+				a.style.display = 'none';
+				b.style.display = 'none';
 			}
 			
 	});
