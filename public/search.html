@@ -127,11 +127,22 @@
 							</td>
 							
 							<!-- For students if they are currently registered for a course display the drop button, otherwise display the register button -->
+							<!-- If register button present also show add to wishlist or drop from wishlist button -->
 							<td>
 						
 								<span v-if="inCourse(item.CRN) === false">   
 									<span v-if="position === 'student'">  <button type="button" v-on:click="register(item.CRN)">Register</button> </span> 
+									
+									<span v-if="inWish(item.CRN) === false"> 
+										<span v-if="position === 'student'">  <button type="button" v-on:click="addToWish(item.CRN)">Add to Wishlist</button> </span> 
+									</span>
+									
+									<span v-if="inWish(item.CRN) === true"> 
+										<span v-if="position === 'student'">  <button type="button" v-on:click="dropFromWish(item.CRN)">Drop from Wishlist</button> </span> 
+									</span>
+									
 								</span>
+								
 								<span v-if="inCourse(item.CRN) === true">
 									<span v-if="position === 'student'">  <button type="button" v-on:click="dropClass(item.CRN)">Drop</button> </span> 
 								</span>
@@ -159,6 +170,14 @@
 			</div><!-- schedule div-->
 			<div id="wishlist" style="display: none; margin:10px;">
 				<p>wishlist</p>
+				<table  v-for="wish in wishlistCourses" style="border-width: 1px; border-color: black; border: solid; margin: 10px; border-collapse: separate; max-width:926px; background-color: #d1d3d2;">
+					<tr>
+						<td class="tableData">{{wish.crn}}</td>
+						<td class="tableData">{{wish.subject}} {{wish.course_number}}</td>
+						<td class="tableData">{{wish.name}}</td>
+						<!--<td class="tableData" v-bind:id="reg.crn + 'scheduleTime'"></td>-->
+					</tr>
+				</table>
 			</div><!-- wishlist div-->
 		</div><!-- app div-->
 
