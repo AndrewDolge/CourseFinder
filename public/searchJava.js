@@ -102,14 +102,15 @@ function init(){
 		}, //computed
 		methods:{
 
-			timeConflict(time){
+			/*timeConflict(time){
 				console.log("time: ")
 				console.log(time)
 				return true;
 
-			},
+			},*/
 
 			inCourse(crn){
+				console.log("hello from line 113");
 				var index;
 				for(index = 0; index < vApp.registeredCourses.length; index++){
 						if(crn == vApp.registeredCourses[index].crn){

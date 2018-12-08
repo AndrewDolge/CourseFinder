@@ -431,13 +431,16 @@ app.get('/position/:pconst', (req, res) => {
 			console.log('Error running query');
 		}
 		else {
-			var x = rows[0].registered_courses.split(",");
 			var cleanCourses = [];
-			var i;
-			for(i=0;i<x.length;i++){
-				cleanCourses.push(parseInt(x[i].replace('W','')));
+			if(rows[0].registered_courses != null){
+				var x = rows[0].registered_courses.split(",");
+				
+				var i;
+				for(i=0;i<x.length;i++){
+					cleanCourses.push(parseInt(x[i].replace('W','')));
+				}
 			}
-			console.log(cleanCourses);
+			//console.log(cleanCourses);
 			var sql_courses = "Sections.crn == " + cleanCourses.join(" OR Sections.crn == ");
 			ust_db.all("SELECT Sections.crn, Sections.times, Sections.subject, Sections.course_number, Courses.name FROM Sections INNER JOIN Courses ON Sections.subject = Courses.subject AND Sections.course_number = Courses.course_number WHERE " + sql_courses, (err, rows2) => {
 				if(err){
