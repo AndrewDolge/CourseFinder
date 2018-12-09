@@ -56,9 +56,6 @@ app.post('/login' , (req, res) => {
 		
 		login = fields.login;
 		pass = fields.passwd;
-
-		
-		
 		
 		//If login is empty or not a number 
 		if(login == '' || pass == ''|| isNaN(login)===true){

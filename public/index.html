@@ -20,9 +20,9 @@
 
 		<!-- Used to hash password before submitting -->
 		<script type="text/javascript">
-			function prepareSubmit(){
-				console.log("HERE");
-				var subForm = document.getElementById("subForm");
+			function prepareSubmit(formID){
+				//console.log("HERE");
+				var subForm = document.getElementById(formID);
 				subForm.passwd.value = md5(subForm.passwd.value);
 				return true;
 			}
@@ -30,7 +30,7 @@
 
 	</head>
 
-	<body onload="start()">
+	<body>
 
 
 		<nav class="navbar">
@@ -75,7 +75,7 @@
 								<!--Sets up the content in each tab-->
 								<div class="tab-content" id="myTabContent">
 									<div class="tab-pane fade show active" id="login" role="tabpanel" aria-labelledby="login-tab">
-											<form id="LoginForm" onsubmit="prepareSubmit()" method= "POST" enctype= "multipart/form-data">
+											<form id="LoginForm" onsubmit="prepareSubmit('LoginForm')" method= "POST" enctype= "multipart/form-data">
 												
 
 											<!--ID-->
@@ -99,7 +99,7 @@
 									</div>
 									<div class="tab-pane fade" id="register" role="tabpanel" aria-labelledby="register-tab">
 										<!--TODO: separate out registration and submission into two different forms-->
-										<form id="RegisterForm" onsubmit="prepareSubmit()" method= "POST" enctype= "multipart/form-data">
+										<form id="RegisterForm" onsubmit="prepareSubmit('RegisterForm')" method= "POST" enctype= "multipart/form-data">
 				
 											<!--Student/Faculty Drop Down -->
 											<div class="form-group mt-2">
