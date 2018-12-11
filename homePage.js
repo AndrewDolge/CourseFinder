@@ -12,6 +12,10 @@ var mime = require('mime-types');
 var port = 8014;
 var public_dir = path.join(__dirname, 'public'); 
 
+//Used for websockets 
+var server = require('http').Server(app);  
+var io = require('socket.io')(server);
+
 //Connection to our database
 var ust_db = new sqlite3.Database(path.join(__dirname, 'db', 'ust_courses.sqlite3'), (err) => {
 	if (err) {
@@ -474,9 +478,9 @@ app.get('/depts', (req, res) => {
 });
 
 //Server listens for requests
-app.listen(port, () => {
+/*app.listen(port, () => {
     console.log('Now listening on port ' + port);
-});
+});*/
 
 /*Function is used to send users back to login page with banner for either successful creation of a new account
 or an error on login/creation of an account*/
@@ -915,3 +919,35 @@ function removePeopleTwo(login,course_drop,nextRegNum, res){
 			
 	
 }//function removePeopleTwo
+
+
+
+//Start of functionality for websockets 
+
+//When a new client connects with the server
+io.on('connection', (client) => {
+	
+	//Add register is sent from a client who clicks the register button and is added to the register count
+	client.on('addRegister', (crn) => {
+        io.emit('addRegister', crn);
+    });
+	//Add waitlist is sent from a client who clicks the register button and is added to the waitlist
+	client.on('addWaitlist', (crn) => {
+        io.emit('addWaitlist', crn);
+    });
+	//Drop course is send from a client who drops a course, field indicates whether the client dropping was on the register list or waitlist 
+	client.on('dropCourse', (crn,field) => {
+        io.emit('dropCourse', crn,field); 
+    });
+	//waitToReg is called when a client is moved from the waitlist to the register list, login represents the users login who is now placed on the register list from the waitlist
+	client.on('waitToReg', (crn,login) => {
+        io.emit('waitToReg', crn,login); 
+    });
+	
+});
+
+
+//Server listens for requests replaces app.listen
+server.listen(port, () => {
+    console.log('Now listening on port ' + port);
+});

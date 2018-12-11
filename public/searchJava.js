@@ -1,4 +1,5 @@
 var vApp;
+var socket;
 function init(){
 	//moves user info from the top of the html page to into the nav bar
 	var user = $('#user').detach();
@@ -165,7 +166,7 @@ function init(){
 	$( document ).ajaxStop(function() {
 			NProgress.done();
 	});
-	console.log(vApp.position);
+	//console.log(vApp.position);
 	if(vApp.position == 'faculty'){ 
 	console.log("line 170");
 		var a = document.getElementById("schedBut");
@@ -174,7 +175,87 @@ function init(){
 		a.style.display = 'none';
 		b.style.display = 'none';
 	}
-}
+	
+	
+	//------Here to end of init function is websocket functionality 
+	socket = io.connect();
+	
+    socket.on('connect', () => {
+        console.log("Connection successful!");
+    });
+	
+	//When user registers increase the section register amount for everyone if currently searching the same page (and recall view roster for faculty)
+    socket.on('addRegister', (crn) => {
+		for(i=0; i < vApp.searchResults.length; i++){
+			if(crn == vApp.searchResults[i].CRN){
+				vApp.searchResults[i].registered = vApp.searchResults[i].registered +1;
+			}
+		}
+		if(vApp.position === 'faculty' && crn == vApp.viewRegCRN){
+			viewRoster(crn);
+		}
+    });
+	
+	//When a user added to a waitlist increase waitlist count if currently searching the same page (and recall view roster for faculty)
+	socket.on('addWaitlist', (crn) => {
+		for(i=0; i < vApp.searchResults.length; i++){
+			if(crn == vApp.searchResults[i].CRN){
+				vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist +1;
+			}
+		}
+		if(vApp.position === 'faculty' && crn == vApp.viewRegCRN){
+			viewRoster(crn);
+		}
+    });
+	
+	//If a user drops a course update the counts for everyone currently searching for the same section and recall view roster for faculty update
+	socket.on('dropCourse', (crn,field) => {
+		for(i=0; i < vApp.searchResults.length; i++){
+			if(crn == vApp.searchResults[i].CRN){
+				if(field === 'W'){
+					vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist -1;
+				}
+				if(field === 'R'){
+					vApp.searchResults[i].registered = vApp.searchResults[i].registered -1;
+				}
+			}
+		}
+		
+		if(vApp.position === 'faculty' && crn == vApp.viewRegCRN){
+			viewRoster(crn);
+		}
+    });
+	
+	//Log = the user login who moved from waitlist to register for a course. If you're this student update your registered courses and change the color of your section
+	//Note: the update color is really only necessary if the user is currently searching for the exact same section. Otherwise will be auto updated when your reclicks search. 
+	socket.on('waitToReg', (crn,log) => {
+		if(log == vApp.login){
+			console.log("IN THE WAITTOREG");
+			var i;
+			
+			for(i = 0; i < vApp.registeredCourses.length; i++){
+				if(vApp.registeredCourses[i].crn[0] === 'W'){
+						console.log(vApp.registeredCourses)
+						if(crn == vApp.registeredCourses[i].crn.substring(1)){
+							console.log("DEEPER IN THE WAIT TO REG");
+							console.log(vApp.registeredCourses[i].crn);
+							vApp.registeredCourses[i].crn = vApp.registeredCourses[i].crn.substring(1);
+							console.log(vApp.registeredCourses[i].crn);
+							var x = document.getElementById(vApp.registeredCourses[i].crn +'color');
+							x.style.backgroundColor= "#45e86e";
+
+						}
+						console.log(vApp.registeredCourses);		
+					}
+			}
+		
+		}
+    });
+	
+	
+	
+	
+}//init
 
 //register for all classes in wishlist
 function regForAll(){
@@ -496,7 +577,7 @@ function register(crn){
 				var i;
 				for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
-						vApp.searchResults[i].registered = vApp.searchResults[i].registered +1;
+						//vApp.searchResults[i].registered = vApp.searchResults[i].registered +1;
 						var x = {
 							course_number: vApp.searchResults[i].course_number,
 							crn: vApp.searchResults[i].CRN,
@@ -506,15 +587,17 @@ function register(crn){
 						}
 						vApp.registeredCourses.push(x);
 					}
-
 				}
+				
+				//Send to server to update everyone
+				socket.emit('addRegister',crn);
 			}
 			//If student is on the waitlist push the crn with a W to the registeredCourses array to change the color and increase the count
 			if(response === 'W'){
 				var i;
 				for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
-						vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist +1;
+						//vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist +1;
 						var x = {
 							course_number: vApp.searchResults[i].course_number,
 							crn: "W" + vApp.searchResults[i].CRN,
@@ -527,6 +610,8 @@ function register(crn){
 					}
 
 				}
+				//Send to server to update everyone
+				socket.emit('addWaitlist',crn);
 			}
 			
 			//To remove from wishlist if they click the register button but course on wishlist
@@ -579,6 +664,15 @@ function dropClass(crn){
 	$.ajax(settings).done(function (response) {
 		var i;
 		var isR = true;
+		
+		//On a dropped class the server will respond with null if noone moved from waitlist or the login of the user moved from waitlist to register 
+		var login = response;
+		if(login !== 'null'){
+			login = response;
+			console.log(login);
+			socket.emit('waitToReg',crn,login);
+		}
+		
 		for(i = 0; i < vApp.registeredCourses.length; i++){
 				if(vApp.registeredCourses[i].crn[0] === 'W'){
 					//If the dropped course is from a waitlist set isR to false and remove the course from registered courses (for color)
@@ -606,11 +700,13 @@ function dropClass(crn){
 			//If there was a waitlist on the course just subtract one from waitlist (since one moved off registered and one moved on registered from waitlist)
 			if(vApp.searchResults[position].waitlist > 0){
 				
-				vApp.searchResults[position].waitlist = vApp.searchResults[position].waitlist -1;	
+				//vApp.searchResults[position].waitlist = vApp.searchResults[position].waitlist -1;	
+				socket.emit('dropCourse',crn,'W');
 			}
 			//If no waitlist then just remove one from the registered count 
 			else if(vApp.searchResults[position].waitlist == 0){
-				vApp.searchResults[position].registered = vApp.searchResults[position].registered -1;
+				//vApp.searchResults[position].registered = vApp.searchResults[position].registered -1;
+				socket.emit('dropCourse',crn,'R');
 				
 			}
 		}
@@ -618,7 +714,8 @@ function dropClass(crn){
 		else if(isR == false){
 			for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
-						vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist -1;	
+						//vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist -1;	
+						socket.emit('dropCourse',crn,'W');
 					}		
 				}
 		}
