@@ -1,3 +1,4 @@
+//import sweetalert;
 var vApp;
 var socket;
 function init(){
@@ -115,9 +116,9 @@ function init(){
 			},*/
 
 			inCourse(crn){
-				console.log("hello from line 113");
+				//console.log("hello from line 113");
 				var index;
-				console.log(crn)
+				//console.log(crn)
 				for(index = 0; index < vApp.registeredCourses.length; index++){
 						if(crn == vApp.registeredCourses[index].crn){
 							return true;
@@ -243,7 +244,8 @@ function init(){
 							console.log(vApp.registeredCourses[i].crn);
 							var x = document.getElementById(vApp.registeredCourses[i].crn +'color');
 							x.style.backgroundColor= "#45e86e";
-
+							alert("You have been moved from the waitlist to registered for "+crn);
+							//swal("Hello world!");
 						}
 						console.log(vApp.registeredCourses);		
 					}
@@ -295,10 +297,9 @@ function getDepts(){
 	});
 }
 
+//for table click functionality
 function reveal(crn, times){
-	//console.log("subject"+crn);
-	var x = document.getElementById(crn).style;//.display = 'table-row';
-	//console.log(x);
+	var x = document.getElementById(crn).style;
 	if(x.display == 'none'){
 		x.display = 'table-row';
 	}
@@ -319,6 +320,7 @@ function makeThisWork(){
 	}
 }
 
+//putting time in individual table slots
 function loadthis(id,timeTable){
 	console.log('here');
 	var times = '';
@@ -588,7 +590,7 @@ function register(crn){
 						vApp.registeredCourses.push(x);
 					}
 				}
-				
+				console.log("registering now, should change color");
 				//Send to server to update everyone
 				socket.emit('addRegister',crn);
 			}
@@ -620,17 +622,6 @@ function register(crn){
 
 }
 
-/*function getColor(crn){
-	console.log("in getcolor");
-	var x = vApp.registeredCourses;
-	
-	var i;
-	for(i=0;i<registeredCourses.length;i++){
-		if(crn == y[i].crn){
-			document.getElementById(crn+'color').style.backgroundColor = '#45e86e';
-		}
-	}
-}*/
 
 //Function sends a post request to the server when a faculty selects the view roster button
 function viewRoster(crn){
