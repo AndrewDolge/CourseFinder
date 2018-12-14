@@ -116,9 +116,7 @@ function init(){
 			},*/
 
 			inCourse(crn){
-				//console.log("hello from line 113");
 				var index;
-				//console.log(crn)
 				for(index = 0; index < vApp.registeredCourses.length; index++){
 						if(crn == vApp.registeredCourses[index].crn){
 							return true;
@@ -231,23 +229,16 @@ function init(){
 	//Note: the update color is really only necessary if the user is currently searching for the exact same section. Otherwise will be auto updated when your reclicks search. 
 	socket.on('waitToReg', (crn,log) => {
 		if(log == vApp.login){
-			console.log("IN THE WAITTOREG");
 			var i;
 			
 			for(i = 0; i < vApp.registeredCourses.length; i++){
 				if(vApp.registeredCourses[i].crn[0] === 'W'){
-						console.log(vApp.registeredCourses)
 						if(crn == vApp.registeredCourses[i].crn.substring(1)){
-							console.log("DEEPER IN THE WAIT TO REG");
-							console.log(vApp.registeredCourses[i].crn);
 							vApp.registeredCourses[i].crn = vApp.registeredCourses[i].crn.substring(1);
-							console.log(vApp.registeredCourses[i].crn);
 							var x = document.getElementById(vApp.registeredCourses[i].crn +'color');
 							x.style.backgroundColor= "#45e86e";
-							alert("You have been moved from the waitlist to registered for "+crn);
-							//swal("Hello world!");
-						}
-						console.log(vApp.registeredCourses);		
+							swal("You have been moved off the waitlist for "+crn + " and are now registered","","success" );
+						}		
 					}
 			}
 		
