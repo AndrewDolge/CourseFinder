@@ -189,7 +189,9 @@
 					<td class="tableData">{{reg.crn}}</td>
 					<td class="tableData">{{reg.subject}} {{reg.course_number}}</td>
 					<td class="tableData">{{reg.name}}</td>
-					<td class="tableData" v-bind:id="reg.crn + 'scheduleTime'"></td>
+					<td class="tableData" v-bind:id="reg.crn + 'scheduleTime'"> </td>
+					<td class="tableData" type="button" v-on:click="clean(reg.crn)"> Drop </button></td>
+				
 				</tr>
 			</table>
 			</div><!-- schedule div-->

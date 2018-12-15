@@ -48,6 +48,8 @@ function init(){
 							x.style.backgroundColor = '#45e86e';
 						}
 						else{
+							//making sure that crn is string before doing a substring 
+							vApp.registeredCourses[i].crn = vApp.registeredCourses[i].crn.toString();
 							var y = vApp.registeredCourses[i].crn.substring(1,vApp.registeredCourses[i].crn.length);
 							x = document.getElementById(y + 'color');
 							if(x != null){
@@ -71,7 +73,8 @@ function init(){
 							x.style.backgroundColor = '#45e86e';
 						}
 						else{
-							var y = vApp.registeredCourses[i].crn;
+							//making sure crn is a string before doing substring 
+							var y = vApp.registeredCourses[i].crn.toString();;
 							var z = y.substring(1,vApp.registeredCourses[i].crn.length);
 							x = document.getElementById(z + 'color');
 							if(x != null){
@@ -235,8 +238,13 @@ function init(){
 				if(vApp.registeredCourses[i].crn[0] === 'W'){
 						if(crn == vApp.registeredCourses[i].crn.substring(1)){
 							vApp.registeredCourses[i].crn = vApp.registeredCourses[i].crn.substring(1);
-							var x = document.getElementById(vApp.registeredCourses[i].crn +'color');
-							x.style.backgroundColor= "#45e86e";
+							var q;
+							for(q=0; q < vApp.searchResults.length; q++){
+								if(crn == vApp.searchResults[q].CRN){
+									var x = document.getElementById(vApp.registeredCourses[i].crn +'color');
+									x.style.backgroundColor= "#45e86e";
+								}
+							}
 							swal("You have been moved off the waitlist for "+crn + " and are now registered","","success" );
 						}		
 					}
@@ -566,11 +574,12 @@ function register(crn){
 
 	$.ajax(settings).done(function (response) {
 			//If student is clear to register push the crn to the registeredCourses array to change the color and increase the count
+			var inSearch = false;
 			if(response === 'R'){
 				var i;
 				for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
-						//vApp.searchResults[i].registered = vApp.searchResults[i].registered +1;
+						inSearch = true;
 						var x = {
 							course_number: vApp.searchResults[i].course_number,
 							crn: vApp.searchResults[i].CRN,
@@ -581,6 +590,25 @@ function register(crn){
 						vApp.registeredCourses.push(x);
 					}
 				}
+				//If when registering the crn is not in the current search results (i.e. registered through wishlist but user searched new subject)
+				if(inSearch === false){
+					
+					for(i=0; i < vApp.wishlistCourses.length; i++){
+						if(crn == vApp.wishlistCourses[i].crn){
+							inSearch = true;
+							var y = {
+								course_number: vApp.wishlistCourses[i].course_number,
+								crn: vApp.wishlistCourses[i].crn,
+								name: vApp.wishlistCourses[i].name,
+								subject: vApp.wishlistCourses[i].subject,
+								times: vApp.wishlistCourses[i].times
+							}
+							vApp.registeredCourses.push(y);
+						}
+					}
+					
+					
+				}
 				console.log("registering now, should change color");
 				//Send to server to update everyone
 				socket.emit('addRegister',crn);
@@ -588,9 +616,10 @@ function register(crn){
 			//If student is on the waitlist push the crn with a W to the registeredCourses array to change the color and increase the count
 			if(response === 'W'){
 				var i;
+				var inSearch2 = false;
 				for(i=0; i < vApp.searchResults.length; i++){
 					if(crn == vApp.searchResults[i].CRN){
-						//vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist +1;
+						inSearch2 = true;
 						var x = {
 							course_number: vApp.searchResults[i].course_number,
 							crn: "W" + vApp.searchResults[i].CRN,
@@ -603,6 +632,26 @@ function register(crn){
 					}
 
 				}
+				//If registering for waitlist and user searched new subject (registered from wishlist)
+				if(inSearch2 === false){
+					
+					for(i=0; i < vApp.wishlistCourses.length; i++){
+						if(crn == vApp.wishlistCourses[i].crn){
+							inSearch = true;
+							var y = {
+								course_number: vApp.wishlistCourses[i].course_number,
+								crn: "W"+vApp.wishlistCourses[i].crn,
+								name: vApp.wishlistCourses[i].name,
+								subject: vApp.wishlistCourses[i].subject,
+								times: vApp.wishlistCourses[i].times
+							}
+							vApp.registeredCourses.push(y);
+						}
+					}
+					
+					
+				}
+				
 				//Send to server to update everyone
 				socket.emit('addWaitlist',crn);
 			}
@@ -632,11 +681,24 @@ function viewRoster(crn){
 
 
 }
+//Clean is a prestep for the view schedule drop button, before calling the drop class function make sure only pass crn without a W
+function clean(crn){
+	if(crn[0] === 'W'){
+		
+		dropClass(crn.substring(1));
+	}
+	else{
+	
+		dropClass(crn);
+	}
+	
+}
 //Function drop class is used to send a post request to the server when a user desires to drop a class, takes the crn of the course to drop
 //NOTE: On next part of project when add web sockets, will need to add ability to also adjust the registered courses for the user moving off the waitlist 
 function dropClass(crn){
 	var urlString = '';
 	urlString = vApp.login+'+'+crn;
+	console.log(crn);
 	var settings = {
 				"async": true,
 				"crossDomain": true,
@@ -645,11 +707,10 @@ function dropClass(crn){
 			   }
 	$.ajax(settings).done(function (response) {
 		var i;
-		var isR = true;
-		
-		//On a dropped class the server will respond with null if noone moved from waitlist or the login of the user moved from waitlist to register 
+		console.log(response);
+		//On a dropped class the server will respond with nullR if noone moved from waitlist and registered student dropped, nullW is noone moved from waitlist and waitlist student dropped or the login of the user moved from waitlist to register 
 		var login = response;
-		if(login !== 'null'){
+		if(login !== 'nullR' && login !== 'nullW'){
 			login = response;
 			console.log(login);
 			socket.emit('waitToReg',crn,login);
@@ -657,10 +718,8 @@ function dropClass(crn){
 		
 		for(i = 0; i < vApp.registeredCourses.length; i++){
 				if(vApp.registeredCourses[i].crn[0] === 'W'){
-					//If the dropped course is from a waitlist set isR to false and remove the course from registered courses (for color)
 					if(crn == vApp.registeredCourses[i].crn.substring(1)){
 						vApp.registeredCourses.splice(i,1);
-						isR = false;
 					}
 								
 				}
@@ -670,37 +729,21 @@ function dropClass(crn){
 				}	
 				
 		}
-		//If the dropped course was a registered course 
-		if(isR == true){
-			var position;
-			//Get the position of the CRN in searchResults array
-			for(i=0; i < vApp.searchResults.length; i++){
-						if(crn == vApp.searchResults[i].CRN){
-							position = i;		
-						}	
-			}
-			//If there was a waitlist on the course just subtract one from waitlist (since one moved off registered and one moved on registered from waitlist)
-			if(vApp.searchResults[position].waitlist > 0){
-				
-				//vApp.searchResults[position].waitlist = vApp.searchResults[position].waitlist -1;	
-				socket.emit('dropCourse',crn,'W');
-			}
-			//If no waitlist then just remove one from the registered count 
-			else if(vApp.searchResults[position].waitlist == 0){
-				//vApp.searchResults[position].registered = vApp.searchResults[position].registered -1;
-				socket.emit('dropCourse',crn,'R');
-				
-			}
+		
+		//If dropped course was from a student on the waitlist 	
+		if(login === 'nullW'){
+			socket.emit('dropCourse',crn,'W');
 		}
-		//If the dropped course is from the waitlist then only need to worry about subtracting the waitlist count 
-		else if(isR == false){
-			for(i=0; i < vApp.searchResults.length; i++){
-					if(crn == vApp.searchResults[i].CRN){
-						//vApp.searchResults[i].waitlist = vApp.searchResults[i].waitlist -1;	
-						socket.emit('dropCourse',crn,'W');
-					}		
-				}
+		//If dropped course from student on the registered list and no waitlist 
+		else if(login === 'nullR'){
+			socket.emit('dropCourse',crn,'R');
 		}
+		//If dropped course from a registered student and there was a student on the waitlist 
+		else if(login !== 'nullR' && login !== 'nullW'){	
+			socket.emit('dropCourse',crn,'W');
+		}		
+			
+		
 	
 	});
 	
