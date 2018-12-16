@@ -9,7 +9,7 @@ var app = express();
 var mime = require('mime-types');
 
 
-var port = 8007;
+var port = 8014;
 var public_dir = path.join(__dirname, 'public'); 
 
 //Used for websockets 
@@ -403,10 +403,16 @@ app.post('/drop/:dconst', (req, res) => {
 			nextRegNum = checkNextReg[cap];
 			console.log("Next Reg Num: "+nextRegNum);
 		}
-		//If there is no waitlist or the person dropping is the first person on the waitlist, then no need to worry about a waitlister becoming registered 
-		if(nextRegNum === false || nextRegNum === login){
+		//If there is no waitlist then no need to worry about a waitlister becoming registered 
+		if(nextRegNum === false){
 			removeFromSections(checkNextReg,login,course_drop,moreThanOne);
-			removePeopleOne(login,course_drop,'null',res);
+			removePeopleOne(login,course_drop,'nullR',res);
+		}
+		//if the person dropping is the first person on the waitlist then no need to worry about a waitlister becoming registered 
+		else if(nextRegNum === login){
+			removeFromSections(checkNextReg,login,course_drop,moreThanOne);
+			removePeopleOne(login,course_drop,'nullW',res);
+		
 		}
 		//Otherwise we will need to test to see if a waitlister needs to become registered with removePeopleTwo
 		else{
@@ -876,7 +882,7 @@ function removePeopleTwo(login,course_drop,nextRegNum, res){
 					console.log('Two WaitLists: '+twoWaitLists);
 					
 					if(twoWaitLists === true){	
-						removePeopleOne(login,parseInt(course_drop),'null',res);
+						removePeopleOne(login,parseInt(course_drop),'nullW',res);
 					}
 					
 					//If a registered student drops and there is a person on the waitlist, move that person on the waitlist to registered 

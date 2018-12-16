@@ -1,6 +1,14 @@
 {
   "name": "CourseFinder",
   "version": "0.1.0",
+  "description": "Course Registration System",
+  "author":{
+	"name": "Christian Linhardt, Zach Glasgow, Issam Himmi, Andrew Dolge",
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AndrewDolge/CourseFinder.git"
+  },
   "devDependencies": {
     "express": "^4.16.4",
     "fs": "0.0.1-security",

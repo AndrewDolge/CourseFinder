@@ -7,6 +7,8 @@
 
 		<!-- Vue Script -->
 		<script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
+		<!-- swal -->
+		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 		<!-- Our custom Script -->
 		<script type="text/javascript" src="searchJava.js"></script>
 		<!-- jQuery Script -->
@@ -200,7 +202,9 @@
 					<td class="tableData">{{reg.crn}}</td>
 					<td class="tableData">{{reg.subject}} {{reg.course_number}}</td>
 					<td class="tableData">{{reg.name}}</td>
-					<td class="tableData" v-bind:id="reg.crn + 'scheduleTime'"></td>
+					<td class="tableData" v-bind:id="reg.crn + 'scheduleTime'"> </td>
+					<td class="tableData btn-primary text-center" type="button" v-on:click="clean(reg.crn)"> Drop </button></td>
+				
 				</tr>
 			</table>
 			</div><!-- schedule div-->
