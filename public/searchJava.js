@@ -461,7 +461,7 @@ function fillTable(){
 				}) //ajax(settings)
 			} //if(atLeastOneChecked)
 			else{
-				alert("Please choose atleast one subject box");
+				alert("Please choose at least one subject box");
 				//console.log("Must select at least one subject");
 
 			}
